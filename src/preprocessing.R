@@ -34,7 +34,8 @@ preprocessingUI <- tabPanel(
       )
     ),
     mainPanel(
-      textOutput("datadescription")
+      uiOutput("colorings"),
+      plotOutput("plotPCA")
     )
   )
 )
