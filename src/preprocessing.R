@@ -4,22 +4,36 @@ datasets <- list.dirs(path = "../data", full.names = TRUE, recursive = FALSE)
 
 preprocessingUI <- tabPanel(
   "Preprocessing",
-  titlePanel("circRNA investigator"),
   sidebarLayout(
     sidebarPanel(
-      sliderInput("bins",
-        "Number of bins:",
-        min = 1,
-        max = 50,
-        value = 30
+      card(
+        card_header("Select dataset"),
+        card_body(
+          selectInput("dataset",
+            "Select dataset:",
+            choices = datasets
+          )
+        )
       ),
-      selectInput("dataset",
-        "Select dataset:",
-        choices = datasets
+      card(
+        card_header("Filter circRNAs"),
+        card_body(
+          sliderInput("min_count",
+            "Min count",
+            min = 0,
+            max = 100,
+            value = 0
+          ),
+          sliderInput("min_samples_pct",
+            "Min samples %",
+            min = 0,
+            max = 100,
+            value = 20.0
+          )
+        )
       )
     ),
     mainPanel(
-      plotOutput("distPlot"),
       textOutput("datadescription")
     )
   )
