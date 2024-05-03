@@ -16,7 +16,12 @@ correlationUI <- tabPanel(
       input_task_button("run_correlation", "Run correlation")
     ),
     mainPanel(
-      verbatimTextOutput("summary"),
+      sliderInput("cor_alpha",
+        "Alpha",
+        min = 0,
+        max = 1,
+        value = 0.05
+      ),
       plotlyOutput("cor_volcano")
     )
   )

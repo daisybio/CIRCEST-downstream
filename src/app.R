@@ -186,18 +186,14 @@ server <- function(input, output, session) {
   output$cor_volcano <- renderPlotly({
     req(cor_result())
     data <- data.frame(rowData(cor_result()))
+    data$significant <- ifelse(data$qvalue < input$cor_alpha, "significant", "not significant")
     plot_ly(
       data,
       x = ~log2FC,
       y = ~ -log10(qvalue),
-      color = ~ ifelse(qvalue < 0.05, "red", "black"),
+      color = ~significant,
       text = ~ paste("Gene: ", rownames(data))
     ) %>% add_markers()
-  })
-
-  output$summary <- renderPrint({
-    req(cor_result())
-    rowData(cor_result())
   })
 }
 
