@@ -23,7 +23,7 @@ preprocessingUI <- tabPanel(
             "Min count",
             min = 0,
             max = 100,
-            value = 0
+            value = 50
           ),
           sliderInput("min_samples_pct",
             "Min samples %",
