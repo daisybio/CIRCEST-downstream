@@ -2,24 +2,26 @@ library(shiny)
 library(bslib)
 library(umap)
 library(DESeq2)
-library(fishpond)
 library(ggfortify)
 library(plotly)
+library(fishpond)
 
 source("preprocessing.R")
+source("correlation.R")
 source("about.R")
 
 # Define UI for app that draws a histogram ----
 ui <- navbarPage(
   "circRNA investigator",
   preprocessingUI,
+  correlationUI,
   aboutUI
 )
 
 deseq_enabled <- FALSE
 
 # Define server logic required to draw a histogram ----
-server <- function(input, output) {
+server <- function(input, output, session) {
   dataset <- reactive({
     se <- readRDS(paste0(input$dataset, "/tx.rds"))
     rownames(colData(se)) <- colData(se)$names
@@ -27,20 +29,50 @@ server <- function(input, output) {
     se
   })
 
+  deseq_coldata <- reactive({
+    se <- dataset()
+    colData(se)[, sapply(
+      colData(se),
+      function(x) length(unique(x)) > 1
+    )]
+  })
+
+  deseq_design <- reactive({
+    colDataFiltered <- deseq_coldata()
+    names <- colnames(colDataFiltered)
+    formula(paste0("~", paste(names, collapse = "+")))
+  })
+
+  normalized_genes <- reactive({
+    table <- read.table(paste0(input$dataset, "/gene.tsv"),
+      header = TRUE, sep = "\t"
+    )
+    rownames(table) <- table$gene_name
+    table$gene_name <- NULL
+    table$gene_id <- NULL
+
+    if (deseq_enabled) {
+      dds <- DESeqDataSetFromMatrix(
+        round(table, 0),
+        deseq_coldata(),
+        design = deseq_design()
+      )
+      dds <- DESeq(dds)
+      counts(dds, normalized = TRUE)
+    } else {
+      table
+    }
+  })
+
   normalized <- reactive({
     se <- dataset()
 
     if (deseq_enabled) {
-      # Keep only columns with more than on unique value
-      colDataFiltered <- colData(se)[, sapply(colData(se), function(x) length(unique(x)) > 1)]
-      names <- colnames(colDataFiltered)
-      design <- formula(paste0("~", paste(names, collapse = "+")))
-
       # Normalize
       dds <- DESeqDataSetFromMatrix(
         round(assay(se), 0),
-        colDataFiltered,
-        design = design
+        deseq_coldata(),
+        design = deseq_design()
       )
       dds <- DESeq(dds)
 
@@ -69,7 +101,7 @@ server <- function(input, output) {
   pca3 <- reactive({
     se <- filtered()
     pca <- prcomp(t(assay(se, "norm")), rank. = 3)
-    components <- pca[['x']]
+    components <- pca[["x"]]
     components <- data.frame(components)
     cbind(components, colData(filtered()))
   })
@@ -80,8 +112,12 @@ server <- function(input, output) {
   })
 
   umap_data <- reactive({
-    se.umap <- umap(pca10()$x, n_components = 3)
-    layout <- se.umap[['layout']]
+    data <- pca10()$x
+    se.umap <- umap(data,
+      n_components = 3,
+      n_neighbors = min(15, nrow(data)) - 1
+    )
+    layout <- se.umap[["layout"]]
     layout <- data.frame(layout)
     cbind(layout, colData(filtered()))
   })
@@ -101,8 +137,8 @@ server <- function(input, output) {
       x = ~PC1,
       y = ~PC2,
       z = ~PC3,
-      color = ~get(input$coloring),
-      text = ~paste("Sample: ", rownames(data))
+      color = ~ get(input$coloring),
+      text = ~ paste("Sample: ", rownames(data))
     ) %>% add_markers()
   })
 
@@ -114,13 +150,41 @@ server <- function(input, output) {
       x = ~X1,
       y = ~X2,
       z = ~X3,
-      color = ~get(input$coloring),
-      text = ~paste("Sample: ", rownames(data))
+      color = ~ get(input$coloring),
+      text = ~ paste("Sample: ", rownames(data))
     ) %>% add_markers()
   })
 
-  output$datadescription <- renderPrint({
-    filtered()
+  se_cor <- reactive({
+    se <- filtered()
+    colData(se) <- cbind(colData(se), t(normalized_genes()))
+    se
+  })
+
+  cor_choices <- reactive({
+    data <- se_cor()
+    # Select all numeric columns
+    col_numeric <- colnames(colData(data))[sapply(colData(data), is.numeric)]
+    # Select all non-singular columns
+    col_numeric[sapply(
+      colData(data)[col_numeric],
+      function(x) length(unique(x)) > 1
+    )]
+  })
+
+  observeEvent(cor_choices(), {
+    updateSelectizeInput(session,
+      "cor_x",
+      choices = cor_choices(), server = TRUE
+    )
+  })
+
+  cor_result <- eventReactive(input$run_correlation, {
+    swish(se_cor(), input$cor_x, cor = input$cor_type)
+  })
+
+  output$summary <- renderPrint({
+    cor_result()
   })
 }
 

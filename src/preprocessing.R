@@ -12,7 +12,7 @@ preprocessingUI <- tabPanel(
           selectInput("dataset",
             "Select dataset:",
             choices = datasets,
-            selected = datasets[2]
+            selected = "../data/test"
           )
         )
       ),
