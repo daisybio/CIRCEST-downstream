@@ -183,8 +183,21 @@ server <- function(input, output, session) {
     swish(se_cor(), input$cor_x, cor = input$cor_type)
   })
 
+  output$cor_volcano <- renderPlotly({
+    req(cor_result())
+    data <- data.frame(rowData(cor_result()))
+    plot_ly(
+      data,
+      x = ~log2FC,
+      y = ~ -log10(qvalue),
+      color = ~ ifelse(qvalue < 0.05, "red", "black"),
+      text = ~ paste("Gene: ", rownames(data))
+    ) %>% add_markers()
+  })
+
   output$summary <- renderPrint({
-    cor_result()
+    req(cor_result())
+    rowData(cor_result())
   })
 }
 

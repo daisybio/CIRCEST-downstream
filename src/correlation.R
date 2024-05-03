@@ -16,7 +16,8 @@ correlationUI <- tabPanel(
       input_task_button("run_correlation", "Run correlation")
     ),
     mainPanel(
-      verbatimTextOutput("summary")
+      verbatimTextOutput("summary"),
+      plotlyOutput("cor_volcano")
     )
   )
 )
