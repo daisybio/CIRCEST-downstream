@@ -207,10 +207,16 @@ server <- function(input, output, session) {
     req(cor_result())
     se <- cor_result()
     se <- se[rowData(se)$qvalue < input$cor_alpha, ]
+
+    # Stop if there are less than 2 transcripts
+    if (nrow(se) < 2) {
+      return(NULL)
+    }
+
     heatmaply(
       assay(se, "norm"),
-      xlab="Samples",
-      ylab="Transcripts",
+      xlab = "Samples",
+      ylab = "Transcripts",
     )
   })
 }

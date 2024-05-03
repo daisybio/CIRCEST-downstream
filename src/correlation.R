@@ -16,14 +16,29 @@ correlationUI <- tabPanel(
       input_task_button("run_correlation", "Run correlation")
     ),
     mainPanel(
-      sliderInput("cor_alpha",
-        "Alpha",
-        min = 0,
-        max = 1,
-        value = 0.05
+      card(
+        card_header("Plot options"),
+        card_body(
+          sliderInput("cor_alpha",
+            "Alpha",
+            min = 0,
+            max = 1,
+            value = 0.05
+          )
+        )
       ),
-      plotlyOutput("cor_volcano"),
-      plotlyOutput("cor_heatmap")
+      card(
+        card_header("Volcano plot"),
+        card_body(
+          plotlyOutput("cor_volcano")
+        )
+      ),
+      card(
+        card_header("Heatmap"),
+        card_body(
+          plotlyOutput("cor_heatmap")
+        )
+      )
     )
   )
 )
