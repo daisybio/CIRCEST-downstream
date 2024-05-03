@@ -1,8 +1,8 @@
 library(SummarizedExperiment)
+library(umap)
 
 se <- readRDS("data/antiHormonal/tx.rds")
 
-rownames(colData(se)) <- colData(se)$names
-colData(se)$names <- NULL
+umap(t(assay(se, "counts")))
 
-print(colData(se))
+print("Finished")

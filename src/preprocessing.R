@@ -11,7 +11,8 @@ preprocessingUI <- tabPanel(
         card_body(
           selectInput("dataset",
             "Select dataset:",
-            choices = datasets
+            choices = datasets,
+            selected = datasets[2]
           )
         )
       ),
@@ -35,7 +36,8 @@ preprocessingUI <- tabPanel(
     ),
     mainPanel(
       uiOutput("colorings"),
-      plotOutput("plotPCA")
+      plotOutput("plotPCA"),
+      #plotOutput("plotUMAP")
     )
   )
 )

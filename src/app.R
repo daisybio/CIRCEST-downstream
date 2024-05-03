@@ -1,5 +1,6 @@
 library(shiny)
 library(bslib)
+library(umap)
 library(DESeq2)
 library(fishpond)
 library(ggfortify)
@@ -66,8 +67,12 @@ server <- function(input, output) {
 
   pca <- reactive({
     se <- filtered()
-    pca <- prcomp(t(assay(se, "norm")))
-    pca
+    prcomp(t(assay(se, "norm")))
+  })
+
+  umap_data <- reactive({
+    se <- filtered()
+    umap(assay(se, "norm"))
   })
 
   output$colorings <- renderUI({
@@ -80,6 +85,10 @@ server <- function(input, output) {
   output$plotPCA <- renderPlot({
     autoplot(pca(), data = colData(filtered()), colour = input$coloring)
   })
+
+  #output$plotUMAP <- renderPlot({
+  #  autoplot(umap_data(), data = colData(filtered()), colour = input$coloring)
+  #})
 
   output$datadescription <- renderPrint({
     filtered()
