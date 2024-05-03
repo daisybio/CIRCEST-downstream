@@ -93,27 +93,27 @@ server <- function(input, output) {
     )
   })
 
-  output$plotPCA <- renderPlotly(
+  output$plotPCA <- renderPlotly({
     plot_ly(
       pca2(),
       x = ~PC1,
       y = ~PC2,
-      color = ~input$coloring,
+      color = ~get(input$coloring),
       type = "scatter",
       mode = "markers"
     )
-  )
+  })
 
-  output$plotUMAP <- renderPlotly(
+  output$plotUMAP <- renderPlotly({
     plot_ly(
       umap_data(),
       x = ~X1,
       y = ~X2,
-      color = ~input$coloring,
+      color = ~get(input$coloring),
       type = "scatter",
       mode = "markers"
     )
-  )
+  })
 
   output$datadescription <- renderPrint({
     filtered()
