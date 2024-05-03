@@ -22,7 +22,8 @@ correlationUI <- tabPanel(
         max = 1,
         value = 0.05
       ),
-      plotlyOutput("cor_volcano")
+      plotlyOutput("cor_volcano"),
+      plotlyOutput("cor_heatmap")
     )
   )
 )

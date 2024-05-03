@@ -58,9 +58,10 @@ server <- function(input, output, session) {
         design = deseq_design()
       )
       dds <- DESeq(dds)
-      counts(dds, normalized = TRUE)
+      normalized <- counts(dds, normalized = TRUE)
+      log1p(normalized)
     } else {
-      table
+      log1p(table)
     }
   })
 
@@ -199,6 +200,18 @@ server <- function(input, output, session) {
         "<br>qvalue: ", qvalue, "<br>log2FC: ", log2FC
       )
     ) %>% add_markers()
+  })
+
+  output$cor_heatmap <- renderPlotly({
+    req(cor_result())
+    se <- cor_result()
+    se <- se[rowData(se)$qvalue < input$cor_alpha, ]
+    plot_ly(
+      x = rownames(colData(se)),
+      y = rownames(se),
+      z = assay(se, "norm"),
+      type = "heatmap"
+    )
   })
 }
 
