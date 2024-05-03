@@ -94,22 +94,26 @@ server <- function(input, output) {
   })
 
   output$plotPCA <- renderPlotly({
+    data <- pca3()
     plot_ly(
-      pca3(),
+      data,
       x = ~PC1,
       y = ~PC2,
       z = ~PC3,
-      color = ~get(input$coloring)
+      color = ~get(input$coloring),
+      text = ~paste("Sample: ", rownames(data))
     ) %>% add_markers()
   })
 
   output$plotUMAP <- renderPlotly({
+    data <- umap_data()
     plot_ly(
-      umap_data(),
+      data,
       x = ~X1,
       y = ~X2,
       z = ~X3,
-      color = ~get(input$coloring)
+      color = ~get(input$coloring),
+      text = ~paste("Sample: ", rownames(data))
     ) %>% add_markers()
   })
 
