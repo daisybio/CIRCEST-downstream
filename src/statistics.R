@@ -4,22 +4,36 @@ correlationUI <- card(
   card_header("Correlation options"),
   card_body(
     selectizeInput("cor_x",
-      "Correlation X:",
+      "Correlation X",
       choices = NULL
     ),
     selectInput("cor_type",
-      "Correlation type:",
+      "Correlation type",
       choices = c("pearson", "spearman"),
       selected = "pearson"
     ),
-    input_task_button("run_correlation", "Run correlation")
+    input_task_button("run_correlation", "Run DEA")
   )
 )
 
 differentialUI <- card(
   card_header("Differential expression options"),
   card_body(
-    "Hello world",
+    selectInput(
+      "diffex_col",
+      "Column",
+      choices = NULL
+    ),
+    selectInput(
+      "diffex_a",
+      "Group A",
+      choices = NULL
+    ),
+    selectInput(
+      "diffex_b",
+      "Group B",
+      choices = NULL
+    ),
     input_task_button("run_differential", "Run differential")
   )
 )
@@ -30,7 +44,7 @@ statisticsUI <- tabPanel(
     sidebarPanel(
       selectInput(
         "test_type",
-        "Test type:",
+        "Test type",
         choices = c("correlation", "differential"),
         selected = "correlation"
       ),
