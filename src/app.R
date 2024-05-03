@@ -94,6 +94,7 @@ server <- function(input, output) {
   })
 
   output$plotPCA <- renderPlotly({
+    req(input$coloring)
     data <- pca3()
     plot_ly(
       data,
@@ -106,6 +107,7 @@ server <- function(input, output) {
   })
 
   output$plotUMAP <- renderPlotly({
+    req(input$coloring)
     data <- umap_data()
     plot_ly(
       data,
