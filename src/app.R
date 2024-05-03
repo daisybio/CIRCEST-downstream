@@ -8,14 +8,14 @@ library(fishpond)
 library(heatmaply)
 
 source("preprocessing.R")
-source("correlation.R")
+source("statistics.R")
 source("about.R")
 
 # Define UI for app that draws a histogram ----
 ui <- navbarPage(
   "circRNA investigator",
   preprocessingUI,
-  correlationUI,
+  statisticsUI,
   aboutUI,
   theme = bs_theme(version = 5, bootswatch = "shiny")
 )
@@ -164,6 +164,14 @@ server <- function(input, output, session) {
     se
   })
 
+  output$statisticsUI <- renderUI({
+    if (input$test_type == "correlation") {
+      correlationUI
+    } else {
+      differentialUI
+    }
+  })
+
   cor_choices <- reactive({
     data <- se_cor()
     # Select all numeric columns
@@ -175,7 +183,7 @@ server <- function(input, output, session) {
     )]
   })
 
-  observeEvent(cor_choices(), {
+  observeEvent(list(cor_choices(), input$test_type), {
     updateSelectizeInput(session,
       "cor_x",
       choices = cor_choices(), server = TRUE
