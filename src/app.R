@@ -66,9 +66,9 @@ server <- function(input, output) {
     se
   })
 
-  pca2 <- reactive({
+  pca3 <- reactive({
     se <- filtered()
-    pca <- prcomp(t(assay(se, "norm")), rank. = 2)
+    pca <- prcomp(t(assay(se, "norm")), rank. = 3)
     components <- pca[['x']]
     components <- data.frame(components)
     cbind(components, colData(filtered()))
@@ -80,7 +80,7 @@ server <- function(input, output) {
   })
 
   umap_data <- reactive({
-    se.umap <- umap(pca10()$x)
+    se.umap <- umap(pca10()$x, n_components = 3)
     layout <- se.umap[['layout']]
     layout <- data.frame(layout)
     cbind(layout, colData(filtered()))
@@ -95,13 +95,12 @@ server <- function(input, output) {
 
   output$plotPCA <- renderPlotly({
     plot_ly(
-      pca2(),
+      pca3(),
       x = ~PC1,
       y = ~PC2,
-      color = ~get(input$coloring),
-      type = "scatter",
-      mode = "markers"
-    )
+      z = ~PC3,
+      color = ~get(input$coloring)
+    ) %>% add_markers()
   })
 
   output$plotUMAP <- renderPlotly({
@@ -109,10 +108,9 @@ server <- function(input, output) {
       umap_data(),
       x = ~X1,
       y = ~X2,
-      color = ~get(input$coloring),
-      type = "scatter",
-      mode = "markers"
-    )
+      z = ~X3,
+      color = ~get(input$coloring)
+    ) %>% add_markers()
   })
 
   output$datadescription <- renderPrint({
