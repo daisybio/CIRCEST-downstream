@@ -181,6 +181,25 @@ server <- function(input, output, session) {
     )
   })
 
+
+  output$download_correlation <- downloadHandler(
+    filename = function() {
+      paste("correlation-",
+        input$cor_x, "-", input$cor_type, ".tsv",
+        sep = ""
+      )
+    },
+    content = function(file) {
+      write.table(
+        assay(se_cor(), "norm"),
+        col.names = NA,
+        file = file,
+        sep = "\t"
+      )
+    },
+    contentType = "text/tab-separated-values"
+  )
+
   cor_result <- eventReactive(input$run_correlation, {
     swish(se_cor(), input$cor_x, cor = input$cor_type)
   })

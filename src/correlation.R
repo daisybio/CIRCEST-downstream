@@ -24,7 +24,8 @@ correlationUI <- tabPanel(
             min = 0,
             max = 1,
             value = 0.05
-          )
+          ),
+          downloadButton("download_correlation", "Download results")
         )
       ),
       card(
