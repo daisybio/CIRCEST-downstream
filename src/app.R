@@ -5,6 +5,7 @@ library(DESeq2)
 library(ggfortify)
 library(plotly)
 library(fishpond)
+library(heatmaply)
 
 source("preprocessing.R")
 source("correlation.R")
@@ -206,11 +207,10 @@ server <- function(input, output, session) {
     req(cor_result())
     se <- cor_result()
     se <- se[rowData(se)$qvalue < input$cor_alpha, ]
-    plot_ly(
-      x = rownames(colData(se)),
-      y = rownames(se),
-      z = assay(se, "norm"),
-      type = "heatmap"
+    heatmaply(
+      assay(se, "norm"),
+      xlab="Samples",
+      ylab="Transcripts",
     )
   })
 }
