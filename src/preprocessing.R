@@ -36,8 +36,8 @@ preprocessingUI <- tabPanel(
     ),
     mainPanel(
       uiOutput("colorings"),
-      plotOutput("plotPCA"),
-      #plotOutput("plotUMAP")
+      plotlyOutput("plotPCA"),
+      plotlyOutput("plotUMAP")
     )
   )
 )

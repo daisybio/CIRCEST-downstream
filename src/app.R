@@ -4,6 +4,7 @@ library(umap)
 library(DESeq2)
 library(fishpond)
 library(ggfortify)
+library(plotly)
 
 source("preprocessing.R")
 source("about.R")
@@ -65,14 +66,24 @@ server <- function(input, output) {
     se
   })
 
-  pca <- reactive({
+  pca2 <- reactive({
     se <- filtered()
-    prcomp(t(assay(se, "norm")))
+    pca <- prcomp(t(assay(se, "norm")), rank. = 2)
+    components <- pca[['x']]
+    components <- data.frame(components)
+    cbind(components, colData(filtered()))
+  })
+
+  pca10 <- reactive({
+    se <- filtered()
+    prcomp(t(assay(se, "norm")), rank. = 10)
   })
 
   umap_data <- reactive({
-    se <- filtered()
-    umap(assay(se, "norm"))
+    se.umap <- umap(pca10()$x)
+    layout <- se.umap[['layout']]
+    layout <- data.frame(layout)
+    cbind(layout, colData(filtered()))
   })
 
   output$colorings <- renderUI({
@@ -82,13 +93,27 @@ server <- function(input, output) {
     )
   })
 
-  output$plotPCA <- renderPlot({
-    autoplot(pca(), data = colData(filtered()), colour = input$coloring)
-  })
+  output$plotPCA <- renderPlotly(
+    plot_ly(
+      pca2(),
+      x = ~PC1,
+      y = ~PC2,
+      color = ~input$coloring,
+      type = "scatter",
+      mode = "markers"
+    )
+  )
 
-  #output$plotUMAP <- renderPlot({
-  #  autoplot(umap_data(), data = colData(filtered()), colour = input$coloring)
-  #})
+  output$plotUMAP <- renderPlotly(
+    plot_ly(
+      umap_data(),
+      x = ~X1,
+      y = ~X2,
+      color = ~input$coloring,
+      type = "scatter",
+      mode = "markers"
+    )
+  )
 
   output$datadescription <- renderPrint({
     filtered()
