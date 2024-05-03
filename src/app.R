@@ -190,6 +190,37 @@ server <- function(input, output, session) {
     )
   })
 
+  observeEvent(input$test_type, {
+    columns <- colnames(colData(filtered()))
+    # Keep columns with more than 1 unique value
+    columns <- columns[sapply(
+      colData(filtered())[columns],
+      function(x) length(unique(x)) > 1
+    )]
+
+    updateSelectInput(session,
+      "diffex_col",
+      choices = columns
+    )
+  })
+
+  observeEvent(input$diffex_col, {
+    updateSelectInput(session,
+      "diffex_a",
+      choices = unique(colData(filtered())[[input$diffex_col]])
+    )
+  })
+
+  observeEvent(input$diffex_col, {
+    choices <- unique(colData(filtered())[[input$diffex_col]])
+
+    updateSelectInput(session,
+      "diffex_b",
+      choices = choices,
+      selected = choices[2]
+    )
+  })
+
 
   output$download_correlation <- downloadHandler(
     filename = function() {
