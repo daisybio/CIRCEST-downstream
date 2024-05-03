@@ -17,7 +17,7 @@ ui <- navbarPage(
   preprocessingUI,
   correlationUI,
   aboutUI,
-  theme = bs_theme(version = 5, bootswatch = "litera")
+  theme = bs_theme(version = 5, bootswatch = "shiny")
 )
 
 deseq_enabled <- FALSE
