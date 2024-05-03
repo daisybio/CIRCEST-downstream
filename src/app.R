@@ -240,8 +240,16 @@ server <- function(input, output, session) {
     contentType = "text/tab-separated-values"
   )
 
-  cor_result <- eventReactive(input$run_correlation, {
-    swish(se_cor(), input$cor_x, cor = input$cor_type)
+  cor_result <- eventReactive(input$run_test, {
+    if (input$test_type == "correlation") {
+      swish(se_cor(), input$cor_x, cor = input$cor_type)
+    } else {
+      data <- filtered()
+      data <- data[colData(data)[, input$diffex_col] %in% c(
+        input$diffex_a, input$diffex_b
+      ), ]
+      swish(data, input$diffex_col)
+    }
   })
 
   output$cor_volcano <- renderPlotly({

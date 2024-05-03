@@ -11,8 +11,7 @@ correlationUI <- card(
       "Correlation type",
       choices = c("pearson", "spearman"),
       selected = "pearson"
-    ),
-    input_task_button("run_correlation", "Run DEA")
+    )
   )
 )
 
@@ -33,8 +32,7 @@ differentialUI <- card(
       "diffex_b",
       "Group B",
       choices = NULL
-    ),
-    input_task_button("run_differential", "Run differential")
+    )
   )
 )
 
@@ -48,7 +46,8 @@ statisticsUI <- tabPanel(
         choices = c("correlation", "differential"),
         selected = "correlation"
       ),
-      uiOutput("statisticsUI")
+      uiOutput("statisticsUI"),
+      input_task_button("run_test", "Run test")
     ),
     mainPanel(
       card(
