@@ -16,7 +16,8 @@ ui <- navbarPage(
   "circRNA investigator",
   preprocessingUI,
   correlationUI,
-  aboutUI
+  aboutUI,
+  theme = bs_theme(version = 5, bootswatch = "litera")
 )
 
 deseq_enabled <- FALSE
