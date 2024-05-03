@@ -35,9 +35,24 @@ preprocessingUI <- tabPanel(
       )
     ),
     mainPanel(
-      uiOutput("colorings"),
-      plotlyOutput("plotPCA"),
-      plotlyOutput("plotUMAP")
+      card(
+        card_header("Settings"),
+        card_body(
+          uiOutput("colorings")
+        )
+      ),
+      card(
+        card_header("PCA"),
+        card_body(
+          plotlyOutput("plotPCA"),
+        )
+      ),
+      card(
+        card_header("UMAP"),
+        card_body(
+          plotlyOutput("plotUMAP")
+        )
+      )
     )
   )
 )
