@@ -240,7 +240,7 @@ server <- function(input, output, session) {
     contentType = "text/tab-separated-values"
   )
 
-  cor_result <- eventReactive(input$run_test, {
+  test_result <- eventReactive(input$run_test, {
     if (input$test_type == "correlation") {
       swish(se_cor(), input$cor_x, cor = input$cor_type)
     } else {
@@ -252,10 +252,10 @@ server <- function(input, output, session) {
     }
   })
 
-  output$cor_volcano <- renderPlotly({
-    req(cor_result())
-    data <- data.frame(rowData(cor_result()))
-    data$significant <- ifelse(data$qvalue < input$cor_alpha,
+  output$volcano <- renderPlotly({
+    req(test_result())
+    data <- data.frame(rowData(test_result()))
+    data$significant <- ifelse(data$qvalue < input$alpha,
       "significant", "not significant"
     )
     plot_ly(
@@ -270,10 +270,10 @@ server <- function(input, output, session) {
     ) %>% add_markers()
   })
 
-  output$cor_heatmap <- renderPlotly({
-    req(cor_result())
-    se <- cor_result()
-    se <- se[rowData(se)$qvalue < input$cor_alpha, ]
+  output$heatmap <- renderPlotly({
+    req(test_result())
+    se <- test_result()
+    se <- se[rowData(se)$qvalue < input$alpha, ]
 
     # Stop if there are less than 2 transcripts
     if (nrow(se) < 2) {

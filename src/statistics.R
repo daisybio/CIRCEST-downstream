@@ -4,7 +4,7 @@ correlationUI <- card(
   card_header("Correlation options"),
   card_body(
     selectizeInput("cor_x",
-      "Correlation X",
+      "Correlation variable",
       choices = NULL
     ),
     selectInput("cor_type",
@@ -53,7 +53,7 @@ statisticsUI <- tabPanel(
       card(
         card_header("Plot options"),
         card_body(
-          sliderInput("cor_alpha",
+          sliderInput("alpha",
             "Alpha",
             min = 0,
             max = 1,
@@ -65,13 +65,13 @@ statisticsUI <- tabPanel(
       card(
         card_header("Volcano plot"),
         card_body(
-          plotlyOutput("cor_volcano")
+          plotlyOutput("volcano")
         )
       ),
       card(
         card_header("Heatmap"),
         card_body(
-          plotlyOutput("cor_heatmap")
+          plotlyOutput("heatmap")
         )
       )
     )
