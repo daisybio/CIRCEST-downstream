@@ -17,7 +17,7 @@ preprocessingUI <- tabPanel(
         )
       ),
       card(
-        card_header("Filter circRNAs"),
+        card_header("Filter transcripts"),
         card_body(
           sliderInput("min_count",
             "Min count",
@@ -30,7 +30,12 @@ preprocessingUI <- tabPanel(
             min = 0,
             max = 100,
             value = 20.0
-          )
+          ),
+          radioButtons("transcript_types", "Transcript types",
+            choices = c("circular", "linear", "both"),
+            selected = "circular"
+          ),
+          textOutput("filtered_description")
         )
       )
     ),

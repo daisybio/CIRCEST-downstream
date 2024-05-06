@@ -31,6 +31,11 @@ server <- function(input, output, session) {
     se <- readRDS(paste0(input$dataset, "/tx.rds"))
     rownames(colData(se)) <- colData(se)$names
     colData(se)$names <- NULL
+    rowData(se)$type <- ifelse(
+      grepl("^circ_", rownames(se)),
+      "circular",
+      "linear"
+    )
     se
   })
 
@@ -101,7 +106,19 @@ server <- function(input, output, session) {
       n_samples * input$min_samples_pct / 100
     )
     se <- se[rowData(se)$keep, ]
+
+    if (input$transcript_types != "both") {
+      se <- se[rowData(se)$type == input$transcript_types, ]
+    }
+
     se
+  })
+
+  output$filtered_description <- renderText({
+    se <- filtered()
+    paste(
+      "Found", nrow(se), "matching transcripts"
+    )
   })
 
   pca3 <- reactive({
