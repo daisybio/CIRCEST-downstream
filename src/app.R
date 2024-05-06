@@ -23,7 +23,7 @@ ui <- navbarPage(
   theme = bs_theme(version = 5, bootswatch = "shiny")
 )
 
-deseq_enabled <- FALSE
+deseq_enabled <- TRUE
 
 # Define server logic required to draw a histogram ----
 server <- function(input, output, session) {
@@ -41,7 +41,7 @@ server <- function(input, output, session) {
 
   deseq_coldata <- reactive({
     se <- dataset()
-    colData(se)[, sapply(
+    colData(se)[sapply(
       colData(se),
       function(x) length(unique(x)) > 1
     )]
@@ -62,8 +62,11 @@ server <- function(input, output, session) {
     table$gene_id <- NULL
 
     if (deseq_enabled) {
+      rounded <- round(table, 0)
+      # Reorder columns to match colData
+      rounded <- rounded[, colnames(deseq_coldata())]
       dds <- DESeqDataSetFromMatrix(
-        round(table, 0),
+        rounded,
         deseq_coldata(),
         design = deseq_design()
       )
