@@ -185,28 +185,38 @@ server <- function(input, output, session) {
 
   output$plotPCA <- renderPlotly({
     print("Rendering PCA")
-    req(input$coloring)
+    coloring <- req(input$coloring)
     data <- pca3()
+
+    if (!coloring %in% colnames(data)) {
+      coloring <- colnames(data)[1]
+    }
+
     plot_ly(
       data,
       x = ~PC1,
       y = ~PC2,
       z = ~PC3,
-      color = ~ get(input$coloring),
+      color = ~ get(coloring),
       text = ~ paste("Sample: ", rownames(data))
     ) %>% add_markers()
   })
 
   output$plotUMAP <- renderPlotly({
     print("Rendering UMAP")
-    req(input$coloring)
+    coloring <- req(input$coloring)
     data <- umap_data()
+
+    if (!coloring %in% colnames(data)) {
+      coloring <- colnames(data)[1]
+    }
+
     plot_ly(
       data,
       x = ~X1,
       y = ~X2,
       z = ~X3,
-      color = ~ get(input$coloring),
+      color = ~ get(coloring),
       text = ~ paste("Sample: ", rownames(data))
     ) %>% add_markers()
   })
