@@ -410,10 +410,10 @@ server <- function(input, output, session) {
     se <- se_pathway()
 
     if (nrow(se) == 0) {
-      return("None of the genes in the pathway are in the dataset")
+      return("No matching transcripts found")
     }
 
-    paste("There are ", nrow(se), " genes in the pathway in the dataset")
+    paste("Found expression information for", nrow(se), " transcripts from genes in the pathway")
   })
 }
 
