@@ -1,0 +1,8 @@
+services:
+  circest-downstream:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    image: bigdatainbiomedicine/circest-downstream:0.0.1
