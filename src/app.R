@@ -49,6 +49,8 @@ deseq_design <- formula(paste0(
 genes_table <- read.table(paste0(data_prefix, "gene.tsv"),
   header = TRUE, sep = "\t"
 )
+# Remove leading X characters from colnames
+colnames(genes_table) <- gsub("^X", "", colnames(genes_table))
 rownames(genes_table) <- genes_table$gene_id
 genes_table$gene_name <- NULL
 genes_table$gene_id <- NULL
