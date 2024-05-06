@@ -1,1 +1,3 @@
-data
+data/*
+!data/gene.tsv
+!data/tx.rds
