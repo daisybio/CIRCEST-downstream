@@ -25,10 +25,26 @@ ui <- navbarPage(
 
 deseq_enabled <- TRUE
 
-# Define server logic required to draw a histogram ----
+data_prefix <- "../data/"
+datasets <- read.table(paste0(data_prefix, "datasets.tsv"),
+  header = TRUE, sep = "\t", row.names = 1
+)
+print(datasets)
+
 server <- function(input, output, session) {
+  output$dataset_selector <- renderUI({
+    print("Rendering dataset selector")
+    selectInput("dataset",
+      "Select dataset:",
+      choices = rownames(datasets),
+      selected = rownames(datasets)[1]
+    )
+  })
+
   dataset <- reactive({
-    se <- readRDS(paste0(input$dataset, "/tx.rds"))
+    print("Reading dataset")
+    se_path <- datasets[req(input$dataset), "transcripts"]
+    se <- readRDS(paste0(data_prefix, se_path))
     rownames(colData(se)) <- colData(se)$names
     colData(se)$names <- NULL
     rowData(se)$type <- ifelse(
@@ -40,6 +56,7 @@ server <- function(input, output, session) {
   })
 
   deseq_coldata <- reactive({
+    print("Reading DESeq coldata")
     se <- dataset()
     colData(se)[sapply(
       colData(se),
@@ -48,13 +65,16 @@ server <- function(input, output, session) {
   })
 
   deseq_design <- reactive({
+    print("Creating DESeq design")
     colDataFiltered <- deseq_coldata()
     names <- colnames(colDataFiltered)
     formula(paste0("~", paste(names, collapse = "+")))
   })
 
   normalized_genes <- reactive({
-    table <- read.table(paste0(input$dataset, "/gene.tsv"),
+    print("Normalizing genes")
+    genes_path <- datasets[req(input$dataset), "genes"]
+    table <- read.table(paste0(data_prefix, genes_path),
       header = TRUE, sep = "\t"
     )
     rownames(table) <- table$gene_id
@@ -79,6 +99,7 @@ server <- function(input, output, session) {
   })
 
   normalized <- reactive({
+    print("Normalizing")
     se <- dataset()
 
     if (deseq_enabled) {
@@ -99,6 +120,7 @@ server <- function(input, output, session) {
   })
 
   filtered <- reactive({
+    print("Filtering")
     se <- normalized()
 
     n_samples <- ncol(se)
@@ -118,6 +140,7 @@ server <- function(input, output, session) {
   })
 
   output$filtered_description <- renderText({
+    print("Rendering filtered description")
     se <- filtered()
     paste(
       "Found", nrow(se), "matching transcripts"
@@ -125,6 +148,7 @@ server <- function(input, output, session) {
   })
 
   pca3 <- reactive({
+    print("Calculating PCA3")
     se <- filtered()
     pca <- prcomp(t(assay(se, "norm")), rank. = 3)
     components <- pca[["x"]]
@@ -133,11 +157,13 @@ server <- function(input, output, session) {
   })
 
   pca10 <- reactive({
+    print("Calculating PCA10")
     se <- filtered()
     prcomp(t(assay(se, "norm")), rank. = 10)
   })
 
   umap_data <- reactive({
+    print("Calculating UMAP")
     data <- pca10()$x
     se.umap <- umap(data,
       n_components = 3,
@@ -149,6 +175,8 @@ server <- function(input, output, session) {
   })
 
   output$colorings <- renderUI({
+    print("Rendering colorings")
+    req(filtered())
     selectInput("coloring",
       "Color by:",
       choices = colnames(colData(filtered()))
@@ -156,6 +184,7 @@ server <- function(input, output, session) {
   })
 
   output$plotPCA <- renderPlotly({
+    print("Rendering PCA")
     req(input$coloring)
     data <- pca3()
     plot_ly(
@@ -169,6 +198,7 @@ server <- function(input, output, session) {
   })
 
   output$plotUMAP <- renderPlotly({
+    print("Rendering UMAP")
     req(input$coloring)
     data <- umap_data()
     plot_ly(
@@ -182,12 +212,14 @@ server <- function(input, output, session) {
   })
 
   se_cor <- reactive({
+    print("Creating SummarizedExperiment for correlation")
     se <- filtered()
     colData(se) <- cbind(colData(se), t(normalized_genes()))
     se
   })
 
   output$statisticsUI <- renderUI({
+    print("Rendering statistics UI")
     if (input$test_type == "correlation") {
       correlationUI
     } else {
@@ -196,6 +228,7 @@ server <- function(input, output, session) {
   })
 
   cor_choices <- reactive({
+    print("Calculating correlation choices")
     data <- se_cor()
     # Select all numeric columns
     col_numeric <- colnames(colData(data))[sapply(colData(data), is.numeric)]
@@ -207,6 +240,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(list(cor_choices(), input$test_type), {
+    print("Updating correlation choices")
     updateSelectizeInput(session,
       "cor_x",
       choices = cor_choices(), server = TRUE
@@ -214,10 +248,12 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$test_type, {
-    columns <- colnames(colData(filtered()))
+    print("Updating correlation type")
+    filtered <- req(filtered())
+    columns <- colnames(colData(filtered))
     # Keep columns with more than 1 unique value
     columns <- columns[sapply(
-      colData(filtered())[columns],
+      colData(filtered)[columns],
       function(x) length(unique(x)) > 1
     )]
 
@@ -228,6 +264,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$diffex_col, {
+    print("Updating differential expression groups A")
     updateSelectInput(session,
       "diffex_a",
       choices = unique(colData(filtered())[[input$diffex_col]])
@@ -235,6 +272,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$diffex_col, {
+    print("Updating differential expression groups B")
     choices <- unique(colData(filtered())[[input$diffex_col]])
 
     updateSelectInput(session,
@@ -264,6 +302,7 @@ server <- function(input, output, session) {
   )
 
   test_result <- eventReactive(input$run_test, {
+    print("Running test")
     if (input$test_type == "correlation") {
       swish(se_cor(), input$cor_x, cor = input$cor_type)
     } else {
@@ -276,6 +315,7 @@ server <- function(input, output, session) {
   })
 
   output$volcano <- renderPlotly({
+    print("Rendering volcano plot")
     req(test_result())
     data <- data.frame(rowData(test_result()))
     data$significant <- ifelse(data$qvalue < input$alpha,
@@ -294,6 +334,7 @@ server <- function(input, output, session) {
   })
 
   output$heatmap <- renderPlotly({
+    print("Rendering heatmap")
     req(test_result())
     se <- test_result()
     se <- se[rowData(se)$qvalue < input$alpha, ]
@@ -311,6 +352,7 @@ server <- function(input, output, session) {
   })
 
   pathways <- reactive({
+    print("Getting pathways")
     content(
       GET("https://webservice.wikipathways.org/listPathways",
         query = list(
@@ -322,26 +364,23 @@ server <- function(input, output, session) {
   })
 
   pathway_names <- reactive({
+    print("Getting pathway names")
     sapply(pathways(), function(x) x$name)
   })
 
   selected_pathway <- reactive({
-    available_pathways <- pathways()
-    selected <- available_pathways[pathway_names() == input$pathway]
+    print("Getting selected pathway")
+    available_pathways <- req(pathways())
+    selected <- available_pathways[req(pathway_names()) == req(input$pathway)]
 
-    if (length(selected) == 0) {
-      return(NULL)
-    }
     selected <- selected[[1]]
 
     selected
   })
 
   participants <- reactive({
-    selected <- selected_pathway()
-    if (is.null(selected)) {
-      return(NULL)
-    }
+    print("Getting participants")
+    selected <- req(selected_pathway())
     url <- paste0(
       "https://www.wikipathways.org/wikipathways-assets/pathways/",
       selected$id,
@@ -355,6 +394,7 @@ server <- function(input, output, session) {
   })
 
   output$pathway_genes <- renderUI({
+    print("Rendering pathway genes")
     # A button for each gene
     genes <- participants()
     lapply(genes, function(gene) {
@@ -366,6 +406,7 @@ server <- function(input, output, session) {
   })
 
   output$select_pathway <- renderUI({
+    print("Rendering select pathway")
     p_names <- pathway_names()
 
     if (length(p_names) == 0) {
@@ -379,6 +420,7 @@ server <- function(input, output, session) {
   })
 
   se_pathway <- reactive({
+    print("Getting SummarizedExperiment for pathway")
     se <- filtered()
     genes <- participants()
 
@@ -396,6 +438,7 @@ server <- function(input, output, session) {
   })
 
   output$pathway_heatmap <- renderPlotly({
+    print("Rendering pathway heatmap")
     se <- se_pathway()
 
     if (nrow(se) == 0) {
@@ -410,13 +453,17 @@ server <- function(input, output, session) {
   })
 
   output$pathway_heatmap_alt <- renderText({
+    print("Rendering pathway heatmap alt text")
     se <- se_pathway()
 
     if (nrow(se) == 0) {
       return("No matching transcripts found")
     }
 
-    paste("Found expression information for", nrow(se), " transcripts from genes in the pathway")
+    paste(
+      "Found expression information for", nrow(se),
+      " transcripts from genes in the pathway"
+    )
   })
 }
 

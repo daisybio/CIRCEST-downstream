@@ -9,11 +9,7 @@ preprocessingUI <- tabPanel(
       card(
         card_header("Select dataset"),
         card_body(
-          selectInput("dataset",
-            "Select dataset:",
-            choices = datasets,
-            selected = "../data/test"
-          )
+          uiOutput("dataset_selector")
         )
       ),
       card(
