@@ -1,5 +1,5 @@
 install.packages(c(
-  "shiny", "BiocManager",
+  "shiny", "BiocManager", "readr",
   "ggfortify", "umap", "plotly", "heatmaply"
 ))
 

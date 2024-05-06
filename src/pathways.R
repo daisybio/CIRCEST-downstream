@@ -14,10 +14,11 @@ pathwaysUI <- tabPanel(
         choices = organisms,
         selected = "Mus musculus"
       ),
-      uiOutput("select_pathway")
+      uiOutput("select_pathway"),
+      uiOutput("pathway_genes")
     ),
     mainPanel(
-      textOutput("selected_participants")
+      
     )
   )
 )

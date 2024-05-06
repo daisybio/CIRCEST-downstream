@@ -318,7 +318,7 @@ server <- function(input, output, session) {
     selected
   })
 
-  output$selected_participants <- renderText({
+  participants <- reactive({
     selected <- selected_pathway()
     url <- paste0(
       "https://www.wikipathways.org/wikipathways-assets/pathways/",
@@ -327,10 +327,20 @@ server <- function(input, output, session) {
       selected$id,
       "-datanodes.tsv"
     )
-    print(url)
-    participants <- content(GET(url))
+    p <- data.frame(content(GET(url)))
 
-    participants
+    p[p$Type == "GeneProduct", ]$Label
+  })
+
+  output$pathway_genes <- renderUI({
+    # A button for each gene
+    genes <- participants()
+    lapply(genes, function(gene) {
+      actionButton(
+        gene,
+        gene
+      )
+    })
   })
 
   output$select_pathway <- renderUI({
