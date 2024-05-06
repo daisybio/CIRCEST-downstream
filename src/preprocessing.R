@@ -7,12 +7,6 @@ preprocessingUI <- tabPanel(
   sidebarLayout(
     sidebarPanel(
       card(
-        card_header("Select dataset"),
-        card_body(
-          uiOutput("dataset_selector")
-        )
-      ),
-      card(
         card_header("Filter transcripts"),
         card_body(
           sliderInput("min_count",

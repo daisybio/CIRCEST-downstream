@@ -26,25 +26,11 @@ ui <- navbarPage(
 deseq_enabled <- TRUE
 
 data_prefix <- "../data/"
-datasets <- read.table(paste0(data_prefix, "datasets.tsv"),
-  header = TRUE, sep = "\t", row.names = 1
-)
-print(datasets)
 
 server <- function(input, output, session) {
-  output$dataset_selector <- renderUI({
-    print("Rendering dataset selector")
-    selectInput("dataset",
-      "Select dataset:",
-      choices = rownames(datasets),
-      selected = rownames(datasets)[1]
-    )
-  })
-
   dataset <- reactive({
     print("Reading dataset")
-    se_path <- datasets[req(input$dataset), "transcripts"]
-    se <- readRDS(paste0(data_prefix, se_path))
+    se <- readRDS(paste0(data_prefix, "tx.rds"))
     rownames(colData(se)) <- colData(se)$names
     colData(se)$names <- NULL
     rowData(se)$type <- ifelse(
@@ -73,8 +59,7 @@ server <- function(input, output, session) {
 
   normalized_genes <- reactive({
     print("Normalizing genes")
-    genes_path <- datasets[req(input$dataset), "genes"]
-    table <- read.table(paste0(data_prefix, genes_path),
+    table <- read.table(paste0(data_prefix, "gene.tsv"),
       header = TRUE, sep = "\t"
     )
     rownames(table) <- table$gene_id
