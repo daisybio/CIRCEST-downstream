@@ -320,6 +320,9 @@ server <- function(input, output, session) {
 
   participants <- reactive({
     selected <- selected_pathway()
+    if (is.null(selected)) {
+      return(NULL)
+    }
     url <- paste0(
       "https://www.wikipathways.org/wikipathways-assets/pathways/",
       selected$id,

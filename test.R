@@ -1,6 +1,6 @@
 library(SummarizedExperiment)
 library(umap)
 
-se <- readRDS("data/antiHormonal/tx.rds")
+se <- readRDS("data/test/tx.rds")
 
-print(se)
+print(rowData(se))
