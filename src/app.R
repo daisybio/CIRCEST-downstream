@@ -27,80 +27,65 @@ deseq_enabled <- TRUE
 
 data_prefix <- "../data/"
 
+se <- readRDS(paste0(data_prefix, "tx.rds"))
+rownames(colData(se)) <- colData(se)$names
+colData(se)$names <- NULL
+rowData(se)$type <- ifelse(
+  grepl("^circ_", rownames(se)),
+  "circular",
+  "linear"
+)
+
+deseq_coldata <- colData(se)[sapply(
+  colData(se),
+  function(x) length(unique(x)) > 1
+)]
+
+deseq_design <- formula(paste0(
+  "~",
+  paste(colnames(deseq_coldata), collapse = "+")
+))
+
+genes_table <- read.table(paste0(data_prefix, "gene.tsv"),
+  header = TRUE, sep = "\t"
+)
+rownames(genes_table) <- genes_table$gene_id
+genes_table$gene_name <- NULL
+genes_table$gene_id <- NULL
+
+if (deseq_enabled) {
+  rounded <- round(genes_table, 0)
+  # Reorder columns to match colData
+  rounded <- rounded[, rownames(deseq_coldata)]
+  dds <- DESeqDataSetFromMatrix(
+    rounded,
+    deseq_coldata,
+    design = deseq_design
+  )
+  dds <- DESeq(dds)
+  normalized_genes <- counts(dds, normalized = TRUE)
+  normalized_genes <- log1p(normalized_genes)
+} else {
+  normalized_genes <- log1p(genes_table)
+}
+
+if (deseq_enabled) {
+  dds <- DESeqDataSetFromMatrix(
+    round(assay(se), 0),
+    deseq_coldata,
+    design = deseq_design
+  )
+
+  dds <- DESeq(dds)
+
+  assay(se, "norm") <- log1p(counts(dds, normalized = TRUE))
+} else {
+  assay(se, "norm") <- log1p(assay(se))
+}
+
+
 server <- function(input, output, session) {
-  dataset <- reactive({
-    print("Reading dataset")
-    se <- readRDS(paste0(data_prefix, "tx.rds"))
-    rownames(colData(se)) <- colData(se)$names
-    colData(se)$names <- NULL
-    rowData(se)$type <- ifelse(
-      grepl("^circ_", rownames(se)),
-      "circular",
-      "linear"
-    )
-    se
-  })
-
-  deseq_coldata <- reactive({
-    print("Reading DESeq coldata")
-    se <- dataset()
-    colData(se)[sapply(
-      colData(se),
-      function(x) length(unique(x)) > 1
-    )]
-  })
-
-  deseq_design <- reactive({
-    print("Creating DESeq design")
-    colDataFiltered <- deseq_coldata()
-    names <- colnames(colDataFiltered)
-    formula(paste0("~", paste(names, collapse = "+")))
-  })
-
-  normalized_genes <- reactive({
-    print("Normalizing genes")
-    table <- read.table(paste0(data_prefix, "gene.tsv"),
-      header = TRUE, sep = "\t"
-    )
-    rownames(table) <- table$gene_id
-    table$gene_name <- NULL
-    table$gene_id <- NULL
-
-    if (deseq_enabled) {
-      rounded <- round(table, 0)
-      # Reorder columns to match colData
-      rounded <- rounded[, rownames(deseq_coldata())]
-      dds <- DESeqDataSetFromMatrix(
-        rounded,
-        deseq_coldata(),
-        design = deseq_design()
-      )
-      dds <- DESeq(dds)
-      normalized <- counts(dds, normalized = TRUE)
-      log1p(normalized)
-    } else {
-      log1p(table)
-    }
-  })
-
   normalized <- reactive({
-    print("Normalizing")
-    se <- dataset()
-
-    if (deseq_enabled) {
-      # Normalize
-      dds <- DESeqDataSetFromMatrix(
-        round(assay(se), 0),
-        deseq_coldata(),
-        design = deseq_design()
-      )
-      dds <- DESeq(dds)
-
-      assay(se, "norm") <- log1p(counts(dds, normalized = TRUE))
-    } else {
-      assay(se, "norm") <- log1p(assay(se))
-    }
-
     se
   })
 
@@ -209,7 +194,9 @@ server <- function(input, output, session) {
   se_cor <- reactive({
     print("Creating SummarizedExperiment for correlation")
     se <- filtered()
-    colData(se) <- cbind(colData(se), t(normalized_genes()))
+    print(dim(colData(se)))
+    print(dim(normalized_genes))
+    colData(se) <- cbind(colData(se), t(normalized_genes))
     se
   })
 
