@@ -314,7 +314,6 @@ server <- function(input, output, session) {
     }
     selected <- selected[[1]]
 
-    print(selected)
     selected
   })
 
@@ -357,6 +356,47 @@ server <- function(input, output, session) {
       "Pathway",
       choices = p_names
     )
+  })
+
+  se_pathway <- reactive({
+    se <- filtered()
+    genes <- participants()
+
+    # If genes is NULL, return an empty SummarizedExperiment
+    if (is.null(genes)) {
+      return(SummarizedExperiment())
+    }
+
+    # rowData(se)$gene_name is a comma-separated list of gene names
+    # We split it and check if any of the genes are in the pathway
+    # Ignore case
+    splitted <- strsplit(rowData(se)$gene_name, ",")
+    keep <- sapply(splitted, function(x) any(tolower(x) %in% tolower(genes)))
+    se[keep, ]
+  })
+
+  output$pathway_heatmap <- renderPlotly({
+    se <- se_pathway()
+
+    if (nrow(se) == 0) {
+      return(NULL)
+    }
+
+    heatmaply(
+      assay(se, "norm"),
+      xlab = "Samples",
+      ylab = "Transcripts",
+    )
+  })
+
+  output$pathway_heatmap_alt <- renderText({
+    se <- se_pathway()
+
+    if (nrow(se) == 0) {
+      return("None of the genes in the pathway are in the dataset")
+    }
+
+    paste("There are ", nrow(se), " genes in the pathway in the dataset")
   })
 }
 

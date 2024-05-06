@@ -18,7 +18,8 @@ pathwaysUI <- tabPanel(
       uiOutput("pathway_genes")
     ),
     mainPanel(
-      
+      textOutput("pathway_heatmap_alt"),
+      plotlyOutput("pathway_heatmap")
     )
   )
 )
