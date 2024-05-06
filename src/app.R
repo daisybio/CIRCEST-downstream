@@ -64,7 +64,7 @@ server <- function(input, output, session) {
     if (deseq_enabled) {
       rounded <- round(table, 0)
       # Reorder columns to match colData
-      rounded <- rounded[, colnames(deseq_coldata())]
+      rounded <- rounded[, rownames(deseq_coldata())]
       dds <- DESeqDataSetFromMatrix(
         rounded,
         deseq_coldata(),
