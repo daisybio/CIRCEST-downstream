@@ -6,8 +6,10 @@ library(ggfortify)
 library(plotly)
 library(fishpond)
 library(heatmaply)
+library(httr)
 
 source("preprocessing.R")
+source("pathways.R")
 source("statistics.R")
 source("about.R")
 
@@ -15,6 +17,7 @@ source("about.R")
 ui <- navbarPage(
   "circRNA investigator",
   preprocessingUI,
+  pathwaysUI,
   statisticsUI,
   aboutUI,
   theme = bs_theme(version = 5, bootswatch = "shiny")
@@ -49,7 +52,7 @@ server <- function(input, output, session) {
     table <- read.table(paste0(input$dataset, "/gene.tsv"),
       header = TRUE, sep = "\t"
     )
-    rownames(table) <- table$gene_name
+    rownames(table) <- table$gene_id
     table$gene_name <- NULL
     table$gene_id <- NULL
 
@@ -79,9 +82,9 @@ server <- function(input, output, session) {
       )
       dds <- DESeq(dds)
 
-      assay(se, "norm") <- counts(dds, normalized = TRUE)
+      assay(se, "norm") <- log1p(counts(dds, normalized = TRUE))
     } else {
-      assay(se, "norm") <- assay(se)
+      assay(se, "norm") <- log1p(assay(se))
     }
 
     se
@@ -284,6 +287,62 @@ server <- function(input, output, session) {
       assay(se, "norm"),
       xlab = "Samples",
       ylab = "Transcripts",
+    )
+  })
+
+  pathways <- reactive({
+    content(
+      GET("https://webservice.wikipathways.org/listPathways",
+        query = list(
+          format = "json",
+          organism = input$organism
+        )
+      )
+    )$pathways
+  })
+
+  pathway_names <- reactive({
+    sapply(pathways(), function(x) x$name)
+  })
+
+  selected_pathway <- reactive({
+    available_pathways <- pathways()
+    selected <- available_pathways[pathway_names() == input$pathway]
+
+    if (length(selected) == 0) {
+      return(NULL)
+    }
+    selected <- selected[[1]]
+
+    print(selected)
+    selected
+  })
+
+  output$selected_participants <- renderText({
+    selected <- selected_pathway()
+    url <- paste0(
+      "https://www.wikipathways.org/wikipathways-assets/pathways/",
+      selected$id,
+      "/",
+      selected$id,
+      "-datanodes.tsv"
+    )
+    print(url)
+    participants <- content(GET(url))
+
+    participants
+  })
+
+  output$select_pathway <- renderUI({
+    p_names <- pathway_names()
+
+    if (length(p_names) == 0) {
+      return(NULL)
+    }
+
+    selectInput("pathway",
+      "Pathway",
+      choices = p_names
     )
   })
 }
