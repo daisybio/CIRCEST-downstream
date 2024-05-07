@@ -1,7 +1,5 @@
 library(shiny)
 
-datasets <- list.dirs(path = "../data", full.names = TRUE, recursive = FALSE)
-
 preprocessingUI <- tabPanel(
   "Preprocessing",
   sidebarLayout(

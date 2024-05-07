@@ -276,7 +276,7 @@ server <- function(input, output, session) {
     },
     content = function(file) {
       write.table(
-        assay(se_cor(), "norm"),
+        rowData(test_result()),
         col.names = NA,
         file = file,
         sep = "\t"
