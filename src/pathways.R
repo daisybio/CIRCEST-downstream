@@ -19,7 +19,8 @@ pathwaysUI <- tabPanel(
     ),
     mainPanel(
       textOutput("pathway_heatmap_alt"),
-      plotlyOutput("pathway_heatmap")
+      plotlyOutput("pathway_heatmap"),
+      downloadButton("download_pathway", "Download SummarizedExperiment")
     )
   )
 )

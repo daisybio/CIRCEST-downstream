@@ -421,6 +421,15 @@ server <- function(input, output, session) {
     se[keep, ]
   })
 
+  output$download_pathway <- downloadHandler(
+    filename = function() {
+      paste("pathway_", sub(" ", "-", req(input$pathway)), ".rds", sep = "")
+    },
+    content = function(file) {
+      saveRDS(se_pathway(), file)
+    },
+  )
+
   output$pathway_heatmap <- renderPlotly({
     print("Rendering pathway heatmap")
     se <- se_pathway()
