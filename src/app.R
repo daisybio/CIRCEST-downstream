@@ -374,7 +374,7 @@ server <- function(input, output, session) {
     )
     p <- data.frame(content(GET(url)))
 
-    p[p$Type == "GeneProduct", ]$Label
+    unique(p[p$Type == "GeneProduct", ]$Label)
   })
 
   output$pathway_genes <- renderUI({
