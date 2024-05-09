@@ -29,37 +29,7 @@ normalized_genes <- loadGenes()
 
 
 server <- function(input, output, session) {
-  normalized <- reactive({
-    se
-  })
-
-  filtered <- reactive({
-    print("Filtering")
-    se <- normalized()
-
-    n_samples <- ncol(se)
-    se <- scaleInfReps(se)
-    se <- labelKeep(
-      se,
-      input$min_count,
-      n_samples * input$min_samples_pct / 100
-    )
-    se <- se[rowData(se)$keep, ]
-
-    if (input$transcript_types != "both") {
-      se <- se[rowData(se)$type == input$transcript_types, ]
-    }
-
-    se
-  })
-
-  output$filtered_description <- renderText({
-    print("Rendering filtered description")
-    se <- filtered()
-    paste(
-      "Found", nrow(se), "matching transcripts"
-    )
-  })
+  filtered <- filteringServer("filtering", se)
 
   pca3 <- reactive({
     print("Calculating PCA3")
