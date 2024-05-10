@@ -1,10 +1,5 @@
 library(shiny)
 library(bslib)
-library(ggfortify)
-library(plotly)
-library(fishpond)
-library(heatmaply)
-library(httr)
 
 source("load.R")
 
@@ -30,19 +25,21 @@ ui <- navbarPage(
   ),
   tabPanel(
     "Pathways",
-    pathwaysUI("pathways"),
+    pathwaysUI("pathways")
   ),
   tabPanel(
     "Statistics",
-    statisticsUI("statistics"),
+    statisticsUI("statistics")
   ),
-  aboutUI,
+  tabPanel(
+    "About",
+    aboutUI
+  ),
   theme = bs_theme(version = 5, bootswatch = "shiny")
 )
 
 se <- loadTx()
 normalized_genes <- loadGenes()
-
 
 server <- function(input, output, session) {
   filtered <- filteringServer("filtering", se)

@@ -1,4 +1,9 @@
 library(shiny)
+library(bslib)
+library(plotly)
+library(SummarizedExperiment)
+library(fishpond)
+library(heatmaply)
 
 correlationUI <- function(id) {
   ns <- NS(id)
@@ -94,8 +99,6 @@ statisticsServer <- function(id, filtered, normalized_genes) {
     se_cor <- reactive({
       print("Creating SummarizedExperiment for correlation")
       se <- filtered()
-      print(dim(colData(se)))
-      print(dim(normalized_genes))
       colData(se) <- cbind(colData(se), t(normalized_genes))
       se
     })
@@ -123,7 +126,6 @@ statisticsServer <- function(id, filtered, normalized_genes) {
 
     observeEvent(list(cor_choices(), input$test_type), {
       print("Updating correlation choices")
-      print(cor_choices())
       updateSelectizeInput(session,
         "cor_x",
         choices = cor_choices(), server = TRUE

@@ -1,4 +1,5 @@
 library(DESeq2)
+library(SummarizedExperiment)
 
 deseq_enabled <- TRUE
 

@@ -1,6 +1,8 @@
 library(shiny)
 library(umap)
 library(plotly)
+library(bslib)
+library(SummarizedExperiment)
 
 dimredUI <- function(id) {
   ns <- NS(id)
