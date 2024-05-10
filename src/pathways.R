@@ -94,12 +94,16 @@ pathwaysServer <- function(id, filtered) {
       print("Rendering pathway genes")
       # A button for each gene
       genes <- participants()
-      lapply(genes, function(gene) {
-        actionButton(
-          gene,
-          gene
-        )
-      })
+      div(
+        lapply(genes, function(gene) {
+          actionButton(
+            gene,
+            gene,
+            style = "flex-grow: 1; margin: 1px"
+          )
+        }),
+        style = "display: flex; flex-wrap: wrap; "
+      )
     })
 
     observeEvent(pathway_names(), {
