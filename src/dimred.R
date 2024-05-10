@@ -9,7 +9,11 @@ dimredUI <- function(id) {
     card(
       card_header("Settings"),
       card_body(
-        uiOutput(ns("colorings"))
+        selectInput(
+          ns("coloring"),
+          "Color by:",
+          choices = NULL
+        )
       )
     ),
     card(
@@ -56,11 +60,9 @@ dimredServer <- function(id, filtered) {
       cbind(layout, colData(filtered()))
     })
 
-    output$colorings <- renderUI({
-      print("Rendering colorings")
-      req(filtered())
-      selectInput("coloring",
-        "Color by:",
+    observeEvent(filtered(), {
+      updateSelectInput(session,
+        "coloring",
         choices = colnames(colData(filtered()))
       )
     })

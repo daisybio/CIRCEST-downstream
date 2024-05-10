@@ -42,6 +42,7 @@ filteringServer <- function(id, se) {
       if (input$transcript_types != "both") {
         se <- se[rowData(se)$type == input$transcript_types, ]
       }
+      se
     })
 
     output$filtered_description <- renderText({
