@@ -32,7 +32,7 @@ pathwaysUI <- function(id) {
       card(
         card_header("Downloads"),
         card_body(
-          uiOutput(ns("donwload_buttons"))
+          uiOutput(ns("download_buttons"))
         )
       ),
       card(
@@ -126,9 +126,11 @@ pathwaysServer <- function(id, filtered) {
       se[keep, ]
     })
 
-    output$donwload_buttons <- renderUI({
+    output$download_buttons <- renderUI({
       ns <- NS(id)
       print("Rendering download buttons")
+      req(input$organism)
+      req(input$pathway)
       req(se_pathway())
 
       div(
