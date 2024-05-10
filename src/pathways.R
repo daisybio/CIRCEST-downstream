@@ -4,6 +4,7 @@ library(heatmaply)
 library(plotly)
 library(SummarizedExperiment)
 library(bslib)
+library(shinycssloaders)
 
 organisms <- httr::content(
   GET("https://webservice.wikipathways.org/listOrganisms?format=json")
@@ -36,7 +37,9 @@ pathwaysUI <- function(id) {
         card_header("Heatmap"),
         card_body(
           textOutput(ns("pathway_heatmap_alt")),
-          plotlyOutput(ns("pathway_heatmap"))
+          withSpinner(
+            plotlyOutput(ns("pathway_heatmap"))
+          )
         )
       )
     )
