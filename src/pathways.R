@@ -20,11 +20,9 @@ pathwaysUI <- function(id) {
         choices = organisms,
         selected = "Mus musculus"
       ),
-      selectInput(ns("pathway"),
-        "Pathway",
-        choices = NULL
-      ),
-      uiOutput(ns("pathway_genes"))
+      withSpinner(
+        uiOutput(ns("pathway_ui"))
+      )
     ),
     mainPanel(
       card(
@@ -50,7 +48,10 @@ pathwaysServer <- function(id, filtered) {
   moduleServer(id, function(input, output, session) {
     pathways <- reactive({
       print("Getting pathways")
-      httr::content(
+    })
+
+    output$pathway_ui <- renderUI({
+      pathways <- httr::content(
         GET("https://webservice.wikipathways.org/listPathways",
           query = list(
             format = "json",
@@ -58,31 +59,33 @@ pathwaysServer <- function(id, filtered) {
           )
         )
       )$pathways
-    })
 
-    pathway_names <- reactive({
-      print("Getting pathway names")
-      sapply(pathways(), function(x) x$name)
-    })
+      ns <- NS(id)
 
-    selected_pathway <- reactive({
-      print("Getting selected pathway")
-      available_pathways <- req(pathways())
-      selected <- available_pathways[req(pathway_names()) == req(input$pathway)]
+      pathwayIDs <- sapply(pathways, function(x) x$id)
+      names(pathwayIDs) <- sapply(pathways, function(x) x$name)
 
-      selected <- selected[[1]]
-
-      selected
+      list(
+        selectInput(
+          ns("pathway"),
+          "Pathway",
+          choices = pathwayIDs
+        ),
+        withSpinner(
+          uiOutput(ns("pathway_genes"))
+        )
+      )
     })
 
     participants <- reactive({
       print("Getting participants")
-      selected <- req(selected_pathway())
+      req(input$organism)
+      selected <- req(input$pathway)
       url <- paste0(
         "https://www.wikipathways.org/wikipathways-assets/pathways/",
-        selected$id,
+        selected,
         "/",
-        selected$id,
+        selected,
         "-datanodes.tsv"
       )
       p <- data.frame(httr::content(GET(url)))
@@ -103,14 +106,6 @@ pathwaysServer <- function(id, filtered) {
           )
         }),
         style = "display: flex; flex-wrap: wrap; "
-      )
-    })
-
-    observeEvent(pathway_names(), {
-      print("Updating pathway names")
-      updateSelectInput(session,
-        "pathway",
-        choices = pathway_names()
       )
     })
 
