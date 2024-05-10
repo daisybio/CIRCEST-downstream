@@ -1,44 +1,50 @@
 library(shiny)
 
-correlationUI <- card(
-  card_header("Correlation options"),
-  card_body(
-    selectizeInput("cor_x",
-      "Correlation variable",
-      choices = NULL
-    ),
-    selectInput("cor_type",
-      "Correlation type",
-      choices = c("pearson", "spearman"),
-      selected = "pearson"
+correlationUI <- function(id) {
+  ns <- NS(id)
+
+  card(
+    card_header("Correlation options"),
+    card_body(
+      selectizeInput(
+        ns("cor_x"),
+        "Correlation variable",
+        choices = NULL
+      ),
+      selectInput(
+        ns("cor_type"),
+        "Correlation type",
+        choices = c("pearson", "spearman"),
+        selected = "pearson"
+      )
     )
   )
-)
+}
 
-differentialUI <- card(
-  card_header("Differential expression options"),
-  card_body(
-    selectInput(
-      "diffex_col",
-      "Column",
-      choices = NULL
-    ),
-    selectInput(
-      "diffex_a",
-      "Group A",
-      choices = NULL
-    ),
-    selectInput(
-      "diffex_b",
-      "Group B",
-      choices = NULL
+differentialUI <- function(id) {
+  ns <- NS(id)
+
+  card(
+    card_header("Differential expression options"),
+    card_body(
+      selectInput(
+        ns("diffex_col"),
+        "Column",
+        choices = NULL
+      ),
+      selectInput(
+        ns("diffex_a"),
+        "Group A",
+        choices = NULL
+      ),
+      selectInput(
+        ns("diffex_b"),
+        "Group B",
+        choices = NULL
+      )
     )
   )
-)
-
-statisticsUI <- tabPanel(
-  "Statistics",
-)
+}
 
 statisticsUI <- function(id) {
   ns <- NS(id)
@@ -97,9 +103,9 @@ statisticsServer <- function(id, filtered, normalized_genes) {
     output$statisticsUI <- renderUI({
       print("Rendering statistics UI")
       if (input$test_type == "correlation") {
-        correlationUI
+        correlationUI(id)
       } else {
-        differentialUI
+        differentialUI(id)
       }
     })
 
@@ -117,6 +123,7 @@ statisticsServer <- function(id, filtered, normalized_genes) {
 
     observeEvent(list(cor_choices(), input$test_type), {
       print("Updating correlation choices")
+      print(cor_choices())
       updateSelectizeInput(session,
         "cor_x",
         choices = cor_choices(), server = TRUE
