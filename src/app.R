@@ -12,7 +12,7 @@ source("filtering.R")
 source("dimred.R")
 # source("pathways.R")
 # source("statistics.R")
-# source("about.R")
+source("about.R")
 
 # Define UI for app that draws a histogram ----
 ui <- navbarPage(
@@ -30,7 +30,7 @@ ui <- navbarPage(
   ),
   # pathwaysUI,
   # statisticsUI,
-  # aboutUI,
+  aboutUI,
   theme = bs_theme(version = 5, bootswatch = "shiny")
 )
 
