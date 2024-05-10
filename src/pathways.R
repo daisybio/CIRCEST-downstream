@@ -29,10 +29,7 @@ pathwaysUI <- function(id) {
       card(
         card_header("Downloads"),
         card_body(
-          downloadButton(
-            ns("download_pathway"),
-            "Download SummarizedExperiment"
-          )
+          uiOutput(ns("donwload_buttons"))
         )
       ),
       card(
@@ -128,7 +125,33 @@ pathwaysServer <- function(id, filtered) {
       se[keep, ]
     })
 
-    output$download_pathway <- downloadHandler(
+    output$donwload_buttons <- renderUI({
+      ns <- NS(id)
+      print("Rendering download buttons")
+      req(se_pathway())
+
+      div(
+        downloadButton(
+          ns("download_csv"),
+          "Download CSV"
+        ),
+        downloadButton(
+          ns("download_se"),
+          "Download SummarizedExperiment"
+        )
+      )
+    })
+
+    output$download_csv <- downloadHandler(
+      filename = function() {
+        paste("pathway_", sub(" ", "-", req(input$pathway)), ".csv", sep = "")
+      },
+      content = function(file) {
+        write.csv(assay(se_pathway()), file, row.names = TRUE)
+      },
+    )
+
+    output$download_se <- downloadHandler(
       filename = function() {
         paste("pathway_", sub(" ", "-", req(input$pathway)), ".rds", sep = "")
       },
