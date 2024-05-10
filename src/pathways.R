@@ -21,7 +21,11 @@ pathwaysUI <- function(id) {
         selected = "Mus musculus"
       ),
       withSpinner(
-        uiOutput(ns("pathway_ui"))
+        uiOutput(ns("pathway_selector")),
+        proxy.height = "50px"
+      ),
+      withSpinner(
+        uiOutput(ns("pathway_genes"))
       )
     ),
     mainPanel(
@@ -50,7 +54,7 @@ pathwaysServer <- function(id, filtered) {
       print("Getting pathways")
     })
 
-    output$pathway_ui <- renderUI({
+    output$pathway_selector <- renderUI({
       pathways <- httr::content(
         GET("https://webservice.wikipathways.org/listPathways",
           query = list(
@@ -65,15 +69,10 @@ pathwaysServer <- function(id, filtered) {
       pathwayIDs <- sapply(pathways, function(x) x$id)
       names(pathwayIDs) <- sapply(pathways, function(x) x$name)
 
-      list(
-        selectInput(
-          ns("pathway"),
-          "Pathway",
-          choices = pathwayIDs
-        ),
-        withSpinner(
-          uiOutput(ns("pathway_genes"))
-        )
+      selectInput(
+        ns("pathway"),
+        "Pathway",
+        choices = pathwayIDs
       )
     })
 
