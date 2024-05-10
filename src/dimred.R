@@ -3,6 +3,7 @@ library(umap)
 library(plotly)
 library(bslib)
 library(SummarizedExperiment)
+library(shinycssloaders)
 
 dimredUI <- function(id) {
   ns <- NS(id)
@@ -21,13 +22,17 @@ dimredUI <- function(id) {
     card(
       card_header("PCA"),
       card_body(
-        plotlyOutput(ns("plotPCA")),
+        withSpinner(
+          plotlyOutput(ns("plotPCA"))
+        )
       )
     ),
     card(
       card_header("UMAP"),
       card_body(
-        plotlyOutput(ns("plotUMAP"))
+        withSpinner(
+          plotlyOutput(ns("plotUMAP"))
+        )
       )
     )
   )
