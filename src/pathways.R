@@ -3,6 +3,7 @@ library(httr)
 library(heatmaply)
 library(plotly)
 library(SummarizedExperiment)
+library(bslib)
 
 organisms <- httr::content(
   GET("https://webservice.wikipathways.org/listOrganisms?format=json")
@@ -25,9 +26,22 @@ pathwaysUI <- function(id) {
       uiOutput(ns("pathway_genes"))
     ),
     mainPanel(
-      textOutput(ns("pathway_heatmap_alt")),
-      plotlyOutput(ns("pathway_heatmap")),
-      downloadButton(ns("download_pathway"), "Download SummarizedExperiment")
+      card(
+        card_header("Downloads"),
+        card_body(
+          downloadButton(
+            ns("download_pathway"),
+            "Download SummarizedExperiment"
+          )
+        )
+      ),
+      card(
+        card_header("Heatmap"),
+        card_body(
+          textOutput(ns("pathway_heatmap_alt")),
+          plotlyOutput(ns("pathway_heatmap"))
+        )
+      ),
     )
   )
 }
