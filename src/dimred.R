@@ -12,11 +12,7 @@ dimredUI <- function(id) {
     card(
       card_header("Settings"),
       card_body(
-        selectInput(
-          ns("coloring"),
-          "Color by:",
-          choices = NULL
-        )
+        uiOutput(ns("select_coloring"))
       )
     ),
     card(
@@ -38,8 +34,17 @@ dimredUI <- function(id) {
   )
 }
 
-dimredServer <- function(id, filtered) {
+dimredServer <- function(id, filtered, columns) {
   moduleServer(id, function(input, output, session) {
+    output$select_coloring <- renderUI({
+      ns <- NS(id)
+      selectInput(
+        ns("coloring"),
+        "Color by",
+        choices = columns
+      )
+    })
+
     pca3 <- reactive({
       print("Calculating PCA3")
       se <- filtered()
@@ -65,13 +70,6 @@ dimredServer <- function(id, filtered) {
       layout <- se.umap[["layout"]]
       layout <- data.frame(layout)
       cbind(layout, colData(filtered()))
-    })
-
-    observeEvent(filtered(), {
-      updateSelectInput(session,
-        "coloring",
-        choices = colnames(colData(filtered()))
-      )
     })
 
     output$plotPCA <- renderPlotly({

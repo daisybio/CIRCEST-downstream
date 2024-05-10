@@ -38,7 +38,7 @@ pathwaysUI <- function(id) {
           textOutput(ns("pathway_heatmap_alt")),
           plotlyOutput(ns("pathway_heatmap"))
         )
-      ),
+      )
     )
   )
 }

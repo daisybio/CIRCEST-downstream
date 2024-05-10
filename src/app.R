@@ -43,7 +43,7 @@ normalized_genes <- loadGenes()
 
 server <- function(input, output, session) {
   filtered <- filteringServer("filtering", se)
-  dimredServer("dimred", filtered)
+  dimredServer("dimred", filtered, colnames(colData(se)))
   pathwaysServer("pathways", filtered)
   statisticsServer("statistics", filtered, normalized_genes)
 }
