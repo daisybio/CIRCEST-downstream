@@ -5,4 +5,4 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8080:8080
-    image: bigdatainbiomedicine/circest-downstream:0.0.6
+    image: bigdatainbiomedicine/circest-downstream:0.1.0
