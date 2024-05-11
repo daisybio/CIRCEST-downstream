@@ -90,6 +90,7 @@ statisticsUI <- function(id) {
       card(
         card_header("Heatmap"),
         card_body(
+          textOutput(ns("heatmap_text")),
           withSpinner(
             plotlyOutput(ns("heatmap"))
           )
@@ -223,11 +224,35 @@ statisticsServer <- function(id, filtered, normalized_genes) {
       ) %>% add_markers()
     })
 
+    test_significant <- reactive({
+      se <- req(test_result())
+      se[rowData(se)$qvalue < input$alpha, ]
+    })
+
+    output$heatmap_text <- renderText({
+      se <- req(test_significant())
+      nrows <- nrow(se)
+
+      if (nrows <= 2) {
+        return(paste(
+          "There were",
+          nrows,
+          "transcripts with a q-value smaller than the defined threshold of ",
+          input$alpha, ". A minimum of 3 is required to plot the heatmap."
+        ))
+      } else {
+        return(paste(
+          "Found",
+          nrows,
+          "transcripts with a q-value smaller than the defined threshold of",
+          input$alpha, "."
+        ))
+      }
+    })
+
     output$heatmap <- renderPlotly({
       print("Rendering heatmap")
-      req(test_result())
-      se <- test_result()
-      se <- se[rowData(se)$qvalue < input$alpha, ]
+      se <- req(test_significant())
 
       # Stop if there are less than 2 transcripts
       if (nrow(se) < 2) {
