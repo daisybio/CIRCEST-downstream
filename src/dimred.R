@@ -48,7 +48,7 @@ dimredServer <- function(id, filtered, columns) {
     pca3 <- reactive({
       print("Calculating PCA3")
       se <- filtered()
-      pca <- prcomp(t(assay(se, "norm")), rank. = 3)
+      pca <- prcomp(t(assay(se, "log")), rank. = 3)
       components <- pca[["x"]]
       components <- data.frame(components)
       cbind(components, colData(filtered()))
@@ -57,7 +57,7 @@ dimredServer <- function(id, filtered, columns) {
     pca10 <- reactive({
       print("Calculating PCA10")
       se <- filtered()
-      prcomp(t(assay(se, "norm")), rank. = 10)
+      prcomp(t(assay(se, "log")), rank. = 10)
     })
 
     umap_data <- reactive({

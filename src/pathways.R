@@ -172,7 +172,7 @@ pathwaysServer <- function(id, filtered) {
       }
 
       heatmaply(
-        assay(se, "norm"),
+        assay(se, "log"),
         xlab = "Samples",
         ylab = "Transcripts",
       )

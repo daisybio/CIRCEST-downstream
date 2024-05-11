@@ -264,7 +264,7 @@ statisticsServer <- function(id, filtered, normalized_genes, navbar_changed) {
       }
 
       heatmaply(
-        assay(se, "norm"),
+        assay(se, "log"),
         xlab = "Samples",
         ylab = "Transcripts",
       )
