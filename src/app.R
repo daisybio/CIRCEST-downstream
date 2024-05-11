@@ -35,6 +35,7 @@ ui <- navbarPage(
     "About",
     aboutUI
   ),
+  id = "navbar",
   theme = bs_theme(version = 5, bootswatch = "shiny")
 )
 
@@ -45,7 +46,10 @@ server <- function(input, output, session) {
   filtered <- filteringServer("filtering", se)
   dimredServer("dimred", filtered, colnames(colData(se)))
   pathwaysServer("pathways", filtered)
-  statisticsServer("statistics", filtered, normalized_genes)
+  statisticsServer(
+    "statistics", filtered, normalized_genes,
+    reactive(input$navbar)
+  )
 }
 
 shinyApp(ui = ui, server = server)

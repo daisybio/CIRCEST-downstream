@@ -100,7 +100,7 @@ statisticsUI <- function(id) {
   )
 }
 
-statisticsServer <- function(id, filtered, normalized_genes) {
+statisticsServer <- function(id, filtered, normalized_genes, navbar_changed) {
   moduleServer(id, function(input, output, session) {
     se_cor <- reactive({
       print("Creating SummarizedExperiment for correlation")
@@ -130,7 +130,7 @@ statisticsServer <- function(id, filtered, normalized_genes) {
       )]
     })
 
-    observeEvent(list(cor_choices(), input$test_type), {
+    observeEvent(list(cor_choices(), input$test_type, navbar_changed()), {
       print("Updating correlation choices")
       updateSelectizeInput(session,
         "cor_x",
