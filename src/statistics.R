@@ -4,6 +4,7 @@ library(plotly)
 library(SummarizedExperiment)
 library(fishpond)
 library(heatmaply)
+library(shinycssloaders)
 
 correlationUI <- function(id) {
   ns <- NS(id)
@@ -81,13 +82,17 @@ statisticsUI <- function(id) {
       card(
         card_header("Volcano plot"),
         card_body(
-          plotlyOutput(ns("volcano"))
+          withSpinner(
+            plotlyOutput(ns("volcano"))
+          )
         )
       ),
       card(
         card_header("Heatmap"),
         card_body(
-          plotlyOutput(ns("heatmap"))
+          withSpinner(
+            plotlyOutput(ns("heatmap"))
+          )
         )
       )
     )
