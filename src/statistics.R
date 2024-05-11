@@ -131,6 +131,10 @@ statisticsServer <- function(id, filtered, normalized_genes, navbar_changed) {
     })
 
     observeEvent(list(cor_choices(), input$test_type, navbar_changed()), {
+      current_value <- input$cor_x
+      if (typeof(current_value) != "NULL" && current_value %in% cor_choices()) {
+        return()
+      }
       print("Updating correlation choices")
       updateSelectizeInput(session,
         "cor_x",
