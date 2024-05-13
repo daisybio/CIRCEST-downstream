@@ -2,30 +2,37 @@ library(shiny)
 library(fishpond)
 library(SummarizedExperiment)
 library(bslib)
+library(shinycssloaders)
 
 filteringUI <- function(id) {
   ns <- NS(id)
 
-  card(
-    card_header("Filter transcripts"),
-    card_body(
-      sliderInput(ns("min_tpm"),
-        "Min TPM",
-        min = 0,
-        max = 100,
-        value = 20
-      ),
-      sliderInput(ns("min_samples_pct"),
-        "Min samples %",
-        min = 0,
-        max = 100,
-        value = 20.0
-      ),
-      radioButtons(ns("transcript_types"), "Transcript types",
-        choices = c("circular", "linear", "both"),
-        selected = "circular"
-      ),
-      textOutput(ns("filtered_description"))
+  tagList(
+    card(
+      card_header("Filter transcripts"),
+      card_body(
+        sliderInput(ns("min_tpm"),
+          "Min TPM",
+          min = 0,
+          max = 100,
+          value = 20
+        ),
+        sliderInput(ns("min_samples_pct"),
+          "Min samples %",
+          min = 0,
+          max = 100,
+          value = 20.0
+        ),
+        radioButtons(ns("transcript_types"), "Transcript types",
+          choices = c("circular", "linear", "both"),
+          selected = "circular"
+        ),
+        textOutput(ns("filtered_description"))
+      )
+    ),
+    withSpinner(
+      uiOutput(ns("download_button")),
+      proxy.height = "50px"
     )
   )
 }
@@ -75,6 +82,24 @@ filteringServer <- function(id, se) {
         "Found", nrow(filtered()), "matching transcripts"
       )
     })
+
+    output$download_button <- renderUI({
+      ns <- NS(id)
+      req(filtered())
+      downloadButton(
+        ns("download_filtered"),
+        "Download filtered SummarizedExperiment"
+      )
+    })
+
+    output$download_filtered <- downloadHandler(
+      filename = function() {
+        "filtered_se.rds"
+      },
+      content = function(file) {
+        saveRDS(filtered(), file)
+      }
+    )
 
     return(filtered)
   })
