@@ -12,8 +12,10 @@ dimredUI <- function(id) {
     card(
       card_header("Settings"),
       card_body(
-        uiOutput(ns("select_coloring"))
-      )
+        uiOutput(ns("select_coloring")),
+        class = "overflow"
+      ),
+      class = "overflow"
     ),
     card(
       card_header("PCA"),

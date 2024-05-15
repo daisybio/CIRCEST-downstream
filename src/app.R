@@ -12,6 +12,11 @@ source("about.R")
 # Define UI for app that draws a histogram ----
 ui <- navbarPage(
   "circRNA investigator",
+  tags$head(tags$style(HTML("
+    .overflow {
+      overflow: visible !important;
+    }
+  "))),
   tabPanel(
     "Preprocessing",
     sidebarLayout(

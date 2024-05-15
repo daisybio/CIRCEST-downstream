@@ -22,8 +22,10 @@ correlationUI <- function(id) {
         "Correlation type",
         choices = c("pearson", "spearman"),
         selected = "pearson"
-      )
-    )
+      ),
+      class = "overflow"
+    ),
+    class = "overflow"
   )
 }
 
@@ -47,8 +49,10 @@ differentialUI <- function(id) {
         ns("diffex_b"),
         "Group B",
         choices = NULL
-      )
-    )
+      ),
+      class = "overflow"
+    ),
+    class = "overflow"
   )
 }
 
