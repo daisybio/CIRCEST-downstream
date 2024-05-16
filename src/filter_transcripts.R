@@ -4,7 +4,7 @@ library(SummarizedExperiment)
 library(bslib)
 library(shinycssloaders)
 
-filteringUI <- function(id) {
+filterTranscriptsUI <- function(id) {
   ns <- NS(id)
 
   tagList(
@@ -59,7 +59,7 @@ labelKeepTPM <- function(y, minTPM = 10, minN = 3, x) {
   y
 }
 
-filteringServer <- function(id, se) {
+filterTranscriptsServer <- function(id, se) {
   moduleServer(id, function(input, output, session) {
     filtered <- reactive({
       n_samples <- ncol(se)

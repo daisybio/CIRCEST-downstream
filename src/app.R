@@ -3,7 +3,7 @@ library(bslib)
 
 source("load.R")
 
-source("filtering.R")
+source("filter_transcripts.R")
 source("dimred.R")
 source("pathways.R")
 source("statistics.R")
@@ -21,7 +21,7 @@ ui <- navbarPage(
     "Preprocessing",
     sidebarLayout(
       sidebarPanel(
-        filteringUI("filtering")
+        filterTranscriptsUI("filtering")
       ),
       mainPanel(
         dimredUI("dimred")
@@ -48,7 +48,7 @@ se <- loadTx()
 normalized_genes <- loadGenes()
 
 server <- function(input, output, session) {
-  filtered <- filteringServer("filtering", se)
+  filtered <- filterTranscriptsServer("filtering", se)
   dimredServer("dimred", filtered, colnames(colData(se)))
   pathwaysServer("pathways", filtered)
   statisticsServer(
