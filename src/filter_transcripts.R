@@ -62,19 +62,22 @@ labelKeepTPM <- function(y, minTPM = 10, minN = 3, x) {
 filterTranscriptsServer <- function(id, se) {
   moduleServer(id, function(input, output, session) {
     filtered <- reactive({
-      n_samples <- ncol(se)
-      se <- scaleInfReps(se)
-      se <- labelKeepTPM(
-        se,
+      se_filtered <- se()
+      n_samples <- ncol(se_filtered)
+      se_filtered <- scaleInfReps(se_filtered)
+      se_filtered <- labelKeepTPM(
+        se_filtered,
         input$min_tpm,
         n_samples * input$min_samples_pct / 100
       )
-      se <- se[rowData(se)$keep, ]
+      se_filtered <- se_filtered[rowData(se_filtered)$keep, ]
 
       if (input$transcript_types != "both") {
-        se <- se[rowData(se)$type == input$transcript_types, ]
+        se_filtered <- se_filtered[
+          rowData(se_filtered)$type == input$transcript_types,
+        ]
       }
-      se
+      se_filtered
     })
 
     output$filtered_description <- renderText({
