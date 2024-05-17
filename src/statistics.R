@@ -109,7 +109,10 @@ statisticsServer <- function(id, filtered, normalized_genes, navbar_changed) {
     se_cor <- reactive({
       print("Creating SummarizedExperiment for correlation")
       se <- filtered()
-      colData(se) <- cbind(colData(se), t(normalized_genes))
+      colData(se) <- cbind(
+        colData(se),
+        t(normalized_genes[, rownames(colData(se))])
+      )
       se
     })
 
