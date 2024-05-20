@@ -8,6 +8,7 @@ source("filter_transcripts.R")
 source("dimred.R")
 source("pathways.R")
 source("statistics.R")
+source("genome_browser.R")
 source("about.R")
 
 # Define UI for app that draws a histogram ----
@@ -18,6 +19,7 @@ ui <- navbarPage(
       overflow: visible !important;
     }
   "))),
+  tags$script(src = "bundle.js"),
   tabPanel(
     "Preprocessing",
     sidebarLayout(
@@ -39,6 +41,10 @@ ui <- navbarPage(
     statisticsUI("statistics")
   ),
   tabPanel(
+    "Genome browser",
+    genomeBrowserUI("genome_browser")
+  ),
+  tabPanel(
     "About",
     aboutUI
   ),
@@ -58,6 +64,7 @@ server <- function(input, output, session) {
     "statistics", filtered, normalized_genes,
     reactive(input$navbar)
   )
+  genomeBrowserServer("genome_browser")
 }
 
 shinyApp(ui = ui, server = server)
