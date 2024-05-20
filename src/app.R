@@ -65,7 +65,7 @@ server <- function(input, output, session) {
     "statistics", filtered, normalized_genes,
     reactive(input$navbar)
   )
-  genomeBrowserServer("genome_browser", genome)
+  genomeBrowserServer("genome_browser", genome, filtered)
 }
 
 shinyApp(ui = ui, server = server)
