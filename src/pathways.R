@@ -10,16 +10,34 @@ organisms <- httr::content(
   GET("https://webservice.wikipathways.org/listOrganisms?format=json")
 )$organisms
 
+genome_organism_map <- list(
+  "hg38" = "Homo sapiens",
+  "hg38_1kg" = "Homo sapiens",
+  "hg19" = "Homo sapiens",
+  "mm39" = "Mus musculus",
+  "mm10" = "Mus musculus",
+  "mm9" = "Mus musculus",
+  "rn6" = "Rattus norvegicus",
+  "panTro4" = "Pan troglodytes",
+  "panTro5" = "Pan troglodytes",
+  "panTro6" = "Pan troglodytes",
+  "canFam3" = "Canis familiaris",
+  "bosTau9" = "Bos taurus",
+  "bosTau8" = "Bos taurus",
+  "susScr11" = "Sus scrofa",
+  "danRer11" = "Danio rerio",
+  "danRer10" = "Danio rerio",
+  "ce11" = "Caenorhabditis elegans",
+  "dm6" = "Drosophila melanogaster",
+  "sacCer3" = "Saccharomyces cerevisiae"
+)
+
 pathwaysUI <- function(id) {
   ns <- NS(id)
 
   sidebarLayout(
     sidebarPanel(
-      selectInput(ns("organism"),
-        "Organism",
-        choices = organisms,
-        selected = "Mus musculus"
-      ),
+      uiOutput(ns("organism_selector")),
       withSpinner(
         uiOutput(ns("pathway_selector")),
         proxy.height = "50px"
@@ -48,10 +66,25 @@ pathwaysUI <- function(id) {
   )
 }
 
-pathwaysServer <- function(id, filtered) {
+pathwaysServer <- function(id, genome, filtered) {
   moduleServer(id, function(input, output, session) {
     pathways <- reactive({
       print("Getting pathways")
+    })
+
+    output$organism_selector <- renderUI({
+      ns <- NS(id)
+
+      selectInput(
+        ns("organism"),
+        "Organism",
+        choices = organisms,
+        selected = ifelse(
+          is.null(genome),
+          NULL,
+          genome_organism_map[[genome]]
+        )
+      )
     })
 
     output$pathway_selector <- renderUI({

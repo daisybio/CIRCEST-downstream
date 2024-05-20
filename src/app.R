@@ -60,7 +60,7 @@ server <- function(input, output, session) {
   se_filtered_samples <- filterSamplesServer("filter_samples", se)
   filtered <- filterTranscriptsServer("filter_transcripts", se_filtered_samples)
   dimredServer("dimred", filtered, colnames(colData(se)))
-  pathwaysServer("pathways", filtered)
+  pathwaysServer("pathways", genome, filtered)
   statisticsServer(
     "statistics", filtered, normalized_genes,
     reactive(input$navbar)
