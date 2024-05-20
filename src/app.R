@@ -54,6 +54,7 @@ ui <- navbarPage(
 
 se <- loadTx()
 normalized_genes <- loadGenes()
+genome <- loadGenome()
 
 server <- function(input, output, session) {
   se_filtered_samples <- filterSamplesServer("filter_samples", se)
@@ -64,7 +65,7 @@ server <- function(input, output, session) {
     "statistics", filtered, normalized_genes,
     reactive(input$navbar)
   )
-  genomeBrowserServer("genome_browser")
+  genomeBrowserServer("genome_browser", genome)
 }
 
 shinyApp(ui = ui, server = server)

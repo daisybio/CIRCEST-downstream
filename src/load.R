@@ -29,3 +29,10 @@ loadTx <- function() {
 loadGenes <- function() {
   return(genes_log)
 }
+
+loadGenome <- function() {
+  # Return the content of genome.txt if it exists
+  if (file.exists(paste0(data_prefix, "genome.txt"))) {
+    return(readLines(paste0(data_prefix, "genome.txt")))
+  }
+}
