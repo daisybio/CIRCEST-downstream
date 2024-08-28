@@ -77,5 +77,19 @@ statisticsServer <- function(id, expr_matrix, phenotype) {
         choices = possible_vals()
       )
     })
+
+    test_result <- eventReactive(input$run_test, {
+      print("Running test")
+      column <- input$col
+      control <- input$control
+      treatment <- input$treatment
+
+      cur_phenotype <- phenotype()
+
+      control_ids <- which(cur_phenotype[[column]] %in% control)
+      treatment_ids <- which(cur_phenotype[[column]] %in% treatment)
+
+      
+    })
   })
 }

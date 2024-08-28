@@ -1,24 +1,11 @@
 source("load.R")
-library(umap)
+source("ciri_de.R")
 
 
-circ <- loadCirc()
 phenotype <- loadPhenotype()
 
-circ <- log1p(circ)
+control_samples <- rownames(head(phenotype))
+treatment_samples <- rownames(tail(phenotype))
 
-pca10 <- prcomp(t(circ), rank. = 10)
+run(control_samples, treatment_samples)
 
-data <- pca10$x
-
-res <- umap(data,
-  n_components = 3,
-  n_neighbors = min(15, nrow(data)) - 1
-)
-
-layout <- res[["layout"]]
-layout <- data.frame(layout)
-
-print(dim(layout))
-
-cbind(layout, phenotype)
