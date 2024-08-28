@@ -1,38 +1,41 @@
-library(SummarizedExperiment)
-
 data_prefix <- "../data/"
 
-se <- readRDS(paste0(data_prefix, "tx.rds"))
-rownames(colData(se)) <- colData(se)$names
-colData(se)$names <- NULL
-rowData(se)$type <- ifelse(
-  grepl("^circ_", rownames(se)),
-  "circular",
-  "linear"
-)
-assay(se, "log") <- log1p(assay(se, "tpm"))
+loadGenes <- function() {
+  genes_path <- paste0(data_prefix, "gene.joined.tsv")
 
-genes_table <- read.table(paste0(data_prefix, "gene.tsv"),
-  header = TRUE, sep = "\t"
-)
-# Remove leading X characters from colnames
-colnames(genes_table) <- gsub("^X", "", colnames(genes_table))
-rownames(genes_table) <- genes_table$gene_id
-genes_table$gene_name <- NULL
-genes_table$gene_id <- NULL
-genes_log <- log1p(genes_table)
+  genes <- read.table(genes_path, header = TRUE, sep = "\t")
+  rownames(genes) <- genes$gene_id
+  genes$gene_id <- NULL
+  genes$gene_name <- NULL
 
-loadTx <- function() {
-  return(se)
+  return(genes)
 }
 
-loadGenes <- function() {
-  return(genes_log)
+loadCirc <- function() {
+  circ_path <- paste0(data_prefix, "circ.joined.tsv")
+
+  circ <- read.table(circ_path, header = TRUE, sep = "\t")
+  rownames(circ) <- circ$circ_id
+  circ$circ_id <- NULL
+  circ$gene_name <- NULL
+
+  return(circ)
+}
+
+loadPhenotype <- function() {
+  phenotype_path <- paste0(data_prefix, "phenotype.csv")
+
+  phenotype <- read.csv(phenotype_path, header = TRUE, sep = ",")
+  rownames(phenotype) <- phenotype$sample
+  phenotype$sample <- NULL
+
+  return(phenotype)
 }
 
 loadGenome <- function() {
   # Return the content of genome.txt if it exists
-  if (file.exists(paste0(data_prefix, "genome.txt"))) {
-    return(readLines(paste0(data_prefix, "genome.txt")))
+  genome_path <- paste0(data_prefix, "genome.txt")
+  if (file.exists(genome_path)) {
+    return(readLines(genome_path))
   }
 }

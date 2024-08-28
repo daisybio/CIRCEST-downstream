@@ -30,7 +30,8 @@
 		// Settings for VS Code.
 		"vscode": {
 			"extensions": [
-				"RDebugger.r-debugger"
+				"RDebugger.r-debugger",
+				"Posit.shiny"
 			],
 			"settings": {
 				"r.rterm.linux": "/usr/local/bin/radian",

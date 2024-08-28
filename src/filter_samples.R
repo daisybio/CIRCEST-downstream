@@ -1,6 +1,4 @@
 library(shiny)
-library(fishpond)
-library(SummarizedExperiment)
 library(bslib)
 library(shinycssloaders)
 
@@ -18,16 +16,16 @@ filterSamplesUI <- function(id) {
   )
 }
 
-filterSamplesServer <- function(id, se) {
+filterSamplesServer <- function(id, phenotype) {
   moduleServer(id, function(input, output, session) {
     output$columnsUI <- renderUI({
       ns <- NS(id)
-      columns <- colnames(colData(se))
+      columns <- colnames(phenotype)
       inputs <- lapply(columns, function(column) {
         selectizeInput(
           inputId = ns(column),
           label = column,
-          choices = unique(colData(se)[[column]]),
+          choices = unique(phenotype[column]),
           multiple = TRUE
         )
       })
@@ -36,27 +34,26 @@ filterSamplesServer <- function(id, se) {
 
     filtered <- reactive({
       print("Filtering samples")
-      columns <- colnames(colData(se))
-      filters <- lapply(columns, function(column) {
+      columns <- colnames(phenotype)
+
+      keep <- rep(TRUE, nrow(phenotype))
+
+      for (i in seq_along(columns)) {
+        column <- columns[i]
         selected <- input[[column]]
         if (is.null(selected)) {
-          selected <- unique(colData(se)[[column]])
+          selected <- unique(phenotype[[column]])
         }
-        selected
-      })
-      print(filters)
-
-      keep <- rep(TRUE, nrow(colData(se)))
-      for (i in seq_along(columns)) {
-        keep <- keep & colData(se)[[columns[i]]] %in% filters[[i]]
+        selected <- as.character(selected)
+        current <- phenotype[[column]] %in% selected
+        keep <- keep & current
       }
-      se_filtered <- se[, keep]
-      se_filtered
+      subset(phenotype, keep)
     })
 
     output$filtered_description <- renderText({
-      se_filtered <- filtered()
-      paste0("Found ", nrow(colData(se_filtered)), " matching samples")
+      phenotype_filtered <- filtered()
+      paste0("Found ", nrow(phenotype_filtered), " matching samples")
     })
 
     return(filtered)

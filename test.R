@@ -1,6 +1,8 @@
-library(SummarizedExperiment)
-library(umap)
+source("load.R")
 
-se <- readRDS("data/test/tx.rds")
+phenotype <- loadPhenotype()
 
-print(rowData(se))
+keep_values <- unique(phenotype[['ag']])
+keep_values <- as.character(keep_values)
+
+print(phenotype[['age']] %in% keep_values)
