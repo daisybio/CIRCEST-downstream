@@ -24,7 +24,7 @@ ui <- navbarPage(
     sidebarLayout(
       sidebarPanel(
         filterSamplesUI("filter_samples"),
-        # filterTranscriptsUI("filter_transcripts")
+        filterTranscriptsUI("filter_transcripts")
       ),
       mainPanel(
         "Hello"
@@ -42,7 +42,7 @@ genome <- loadGenome()
 
 server <- function(input, output, session) {
   filtered_phenotype <- filterSamplesServer("filter_samples", phenotype)
-  # filtered <- filterTranscriptsServer("filter_transcripts", se_filtered_samples)
+  filtered_expression <- filterTranscriptsServer("filter_transcripts", circ_cpm, filtered_phenotype)
 }
 
 shinyApp(ui = ui, server = server)

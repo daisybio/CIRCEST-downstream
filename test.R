@@ -1,8 +1,9 @@
 source("load.R")
 
-phenotype <- loadPhenotype()
+circ <- loadCirc()
 
-keep_values <- unique(phenotype[['ag']])
-keep_values <- as.character(keep_values)
+# circ is a numeric dataframe
+# Calculate median of each row
+circ_median <- apply(circ, 1, median)
 
-print(phenotype[['age']] %in% keep_values)
+print(median(circ_median))

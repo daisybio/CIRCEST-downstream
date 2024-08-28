@@ -1,6 +1,4 @@
 library(shiny)
-library(fishpond)
-library(SummarizedExperiment)
 library(bslib)
 library(shinycssloaders)
 
@@ -11,21 +9,12 @@ filterTranscriptsUI <- function(id) {
     card(
       card_header("Filter transcripts"),
       card_body(
-        sliderInput(ns("min_tpm"),
-          "Min TPM",
-          min = 0,
-          max = 100,
-          value = 20
-        ),
+        uiOutput(ns("threshold_selector")),
         sliderInput(ns("min_samples_pct"),
           "Min samples %",
           min = 0,
           max = 100,
           value = 20.0
-        ),
-        radioButtons(ns("transcript_types"), "Transcript types",
-          choices = c("circular", "linear", "both"),
-          selected = "circular"
         ),
         textOutput(ns("filtered_description"))
       )
@@ -37,47 +26,33 @@ filterTranscriptsUI <- function(id) {
   )
 }
 
-labelKeepTPM <- function(y, minTPM = 10, minN = 3, x) {
-  if (!missing(x)) {
-    stopifnot(x %in% names(colData(y)))
-    minN <- min(table(colData(y)[[x]]))
-    if (minN > 10) {
-      minN <- 10 + (minN - 10) * 0.7
-    }
-  }
-  cts <- assays(y)[["tpm"]]
-  if (is(cts, "dgCMatrix")) {
-    keep <- Matrix::rowSums(cts >= minTPM) >= minN
-  } else {
-    keep <- rowSums(cts >= minTPM) >= minN
-  }
-  mcols(y)$keep <- keep
-  metadata(y)$preprocessed <- TRUE
-  if (!"infRepsScaled" %in% names(metadata(y))) {
-    metadata(y)$infRepsScaled <- FALSE
-  }
-  y
-}
-
-filterTranscriptsServer <- function(id, se) {
+filterTranscriptsServer <- function(id, matrix, phenotype) {
   moduleServer(id, function(input, output, session) {
-    filtered <- reactive({
-      se_filtered <- se()
-      n_samples <- ncol(se_filtered)
-      se_filtered <- scaleInfReps(se_filtered)
-      se_filtered <- labelKeepTPM(
-        se_filtered,
-        input$min_tpm,
-        n_samples * input$min_samples_pct / 100
-      )
-      se_filtered <- se_filtered[rowData(se_filtered)$keep, ]
+    matrixSamples <- reactive({
+      cur_matrix <- matrix[, rownames(phenotype())]
+      cur_matrix
+    })
 
-      if (input$transcript_types != "both") {
-        se_filtered <- se_filtered[
-          rowData(se_filtered)$type == input$transcript_types,
-        ]
-      }
-      se_filtered
+    output$threshold_selector <- renderUI({
+      cur_matrix <- matrixSamples()
+      ns <- NS(id)
+
+      sliderInput(ns("threshold"),
+        "Threshold",
+        min = 0,
+        max = max(cur_matrix),
+        value = 0
+      )
+    })
+
+    filtered <- reactive({
+      cur_matrix <- matrixSamples()
+      threshold <- input$threshold
+
+      keep <- cur_matrix >= threshold
+      keep <- rowSums(keep) >= input$min_samples_pct / 100 * ncol(cur_matrix)
+
+      cur_matrix[keep, ]
     })
 
     output$filtered_description <- renderText({
@@ -91,16 +66,16 @@ filterTranscriptsServer <- function(id, se) {
       req(filtered())
       downloadButton(
         ns("download_filtered"),
-        "Download filtered SummarizedExperiment"
+        "Download filtered expression matrix"
       )
     })
 
     output$download_filtered <- downloadHandler(
       filename = function() {
-        "filtered_se.rds"
+        "filtered_expression.tsv"
       },
       content = function(file) {
-        saveRDS(filtered(), file)
+        write.table(filtered(), file, sep = "\t", col.names = NA)
       }
     )
 
