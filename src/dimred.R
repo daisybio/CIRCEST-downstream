@@ -2,7 +2,6 @@ library(shiny)
 library(umap)
 library(plotly)
 library(bslib)
-library(SummarizedExperiment)
 library(shinycssloaders)
 
 dimredUI <- function(id) {
@@ -36,10 +35,13 @@ dimredUI <- function(id) {
   )
 }
 
-dimredServer <- function(id, filtered, columns) {
+dimredServer <- function(id, expr_matrix, phenotype) {
   moduleServer(id, function(input, output, session) {
     output$select_coloring <- renderUI({
       ns <- NS(id)
+
+      columns <- colnames(phenotype())
+
       selectInput(
         ns("coloring"),
         "Color by",
@@ -47,31 +49,33 @@ dimredServer <- function(id, filtered, columns) {
       )
     })
 
+    log_expression <- reactive({
+      log1p(expr_matrix())
+    })
+
     pca3 <- reactive({
       print("Calculating PCA3")
-      se <- filtered()
-      pca <- prcomp(t(assay(se, "log")), rank. = 3)
+      pca <- prcomp(t(log_expression()), rank. = 3)
       components <- pca[["x"]]
       components <- data.frame(components)
-      cbind(components, colData(filtered()))
+      cbind(components, phenotype())
     })
 
     pca10 <- reactive({
       print("Calculating PCA10")
-      se <- filtered()
-      prcomp(t(assay(se, "log")), rank. = 10)
+      prcomp(t(log_expression()), rank. = 10)
     })
 
     umap_data <- reactive({
       print("Calculating UMAP")
       data <- pca10()$x
-      se.umap <- umap(data,
+      res <- umap(data,
         n_components = 3,
         n_neighbors = min(15, nrow(data)) - 1
       )
-      layout <- se.umap[["layout"]]
+      layout <- res[["layout"]]
       layout <- data.frame(layout)
-      cbind(layout, colData(filtered()))
+      cbind(layout, phenotype())
     })
 
     output$plotPCA <- renderPlotly({

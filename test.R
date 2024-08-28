@@ -1,9 +1,24 @@
 source("load.R")
+library(umap)
+
 
 circ <- loadCirc()
+phenotype <- loadPhenotype()
 
-# circ is a numeric dataframe
-# Calculate median of each row
-circ_median <- apply(circ, 1, median)
+circ <- log1p(circ)
 
-print(median(circ_median))
+pca10 <- prcomp(t(circ), rank. = 10)
+
+data <- pca10$x
+
+res <- umap(data,
+  n_components = 3,
+  n_neighbors = min(15, nrow(data)) - 1
+)
+
+layout <- res[["layout"]]
+layout <- data.frame(layout)
+
+print(dim(layout))
+
+cbind(layout, phenotype)

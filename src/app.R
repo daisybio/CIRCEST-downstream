@@ -27,7 +27,7 @@ ui <- navbarPage(
         filterTranscriptsUI("filter_transcripts")
       ),
       mainPanel(
-        "Hello"
+        dimredUI("dimred")
       )
     )
   ),
@@ -43,6 +43,7 @@ genome <- loadGenome()
 server <- function(input, output, session) {
   filtered_phenotype <- filterSamplesServer("filter_samples", phenotype)
   filtered_expression <- filterTranscriptsServer("filter_transcripts", circ_cpm, filtered_phenotype)
+  dimredServer("dimred", filtered_expression, filtered_phenotype)
 }
 
 shinyApp(ui = ui, server = server)
