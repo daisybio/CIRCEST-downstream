@@ -3,6 +3,7 @@ library(bslib)
 library(plotly)
 library(heatmaply)
 library(shinycssloaders)
+source("ciri_de.R")
 
 statisticsUI <- function(id) {
   ns <- NS(id)
@@ -32,6 +33,18 @@ statisticsUI <- function(id) {
             value = 0.05
           ),
           downloadButton(ns("download_correlation"), "Download results")
+        )
+      ),
+      card(
+        card_header("Results: circRNA"),
+        card_body(
+          tableOutput(ns("result_table_circ"))
+        )
+      ),
+      card(
+        card_header("Results: gene"),
+        card_body(
+          tableOutput(ns("result_table_gene"))
         )
       )
     )
@@ -86,10 +99,30 @@ statisticsServer <- function(id, expr_matrix, phenotype) {
 
       cur_phenotype <- phenotype()
 
-      control_ids <- which(cur_phenotype[[column]] %in% control)
-      treatment_ids <- which(cur_phenotype[[column]] %in% treatment)
+      control_samples <- rownames(cur_phenotype[cur_phenotype[[column]] %in% control, ])
+      treatment_samples <- rownames(cur_phenotype[cur_phenotype[[column]] %in% treatment, ])
 
-      
+      run(control_samples, treatment_samples)
+    })
+
+    gene_results <- reactive({
+      test_result()[[1]]
+    })
+
+    circ_results <- reactive({
+      test_result()[[2]]
+    })
+
+    output$result_table_circ <- renderTable({
+      results <- circ_results()
+      results <- cbind("circRNA" = rownames(results), results)
+      head(results)
+    })
+
+    output$result_table_gene <- renderTable({
+      results <- gene_results()
+      results <- cbind("gene" = rownames(results), results)
+      head(results)
     })
   })
 }
