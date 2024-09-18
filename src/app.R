@@ -46,7 +46,7 @@ server <- function(input, output, session) {
   filtered_phenotype <- filterSamplesServer("filter_samples", phenotype)
   filtered_expression <- filterTranscriptsServer("filter_transcripts", circ_cpm, filtered_phenotype)
   dimredServer("dimred", filtered_expression, filtered_phenotype)
-  statisticsServer("statistics", filtered_expression, filtered_phenotype)
+  statisticsServer("statistics", filtered_expression, filtered_phenotype, circ_cpm)
 }
 
 shinyApp(ui = ui, server = server)

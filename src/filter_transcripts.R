@@ -30,6 +30,7 @@ filterTranscriptsServer <- function(id, matrix, phenotype) {
   moduleServer(id, function(input, output, session) {
     matrixSamples <- reactive({
       cur_matrix <- matrix[, rownames(phenotype())]
+      cur_matrix$gene_id <- NULL
       cur_matrix
     })
 

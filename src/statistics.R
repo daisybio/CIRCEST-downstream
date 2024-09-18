@@ -51,7 +51,7 @@ statisticsUI <- function(id) {
   )
 }
 
-statisticsServer <- function(id, expr_matrix, phenotype) {
+statisticsServer <- function(id, expr_matrix, phenotype, circ_cpm) {
   moduleServer(id, function(input, output, session) {
 
     output$column_select <- renderUI({
@@ -106,23 +106,26 @@ statisticsServer <- function(id, expr_matrix, phenotype) {
     })
 
     gene_results <- reactive({
-      test_result()[[1]]
+      results <- test_result()[[1]]
+      results[results$FDR < input$alpha, ]
     })
 
     circ_results <- reactive({
-      test_result()[[2]]
+      results <- test_result()[[2]]
+      results <- results[results$FDR < input$alpha, ]
+      annotated <- cbind(circ_cpm[rownames(results), ]$gene_id, results)
+      colnames(annotated)[1] <- "host_gene"
+      annotated
     })
 
     output$result_table_circ <- renderTable({
       results <- circ_results()
-      results <- cbind("circRNA" = rownames(results), results)
-      head(results)
+      cbind("circRNA" = rownames(results), results)
     })
 
     output$result_table_gene <- renderTable({
       results <- gene_results()
-      results <- cbind("gene" = rownames(results), results)
-      head(results)
+      cbind("gene" = rownames(results), results)
     })
   })
 }

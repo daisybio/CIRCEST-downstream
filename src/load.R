@@ -17,7 +17,6 @@ loadCirc <- function() {
   circ <- read.table(circ_path, header = TRUE, sep = "\t")
   rownames(circ) <- circ$circ_id
   circ$circ_id <- NULL
-  circ$gene_id <- NULL
 
   return(circ)
 }
