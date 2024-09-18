@@ -1,4 +1,4 @@
-
+library(stringi)
 
 work_dir <- "../data/work"
 circ_dir <- "../data/circ"
@@ -51,10 +51,21 @@ run <- function(control, treatment) {
   treatment_df <- create_df(treatment, "T")
   df <- rbind(control_df, treatment_df)
 
-  temp_dir <- work_dir
+  tryCatch({
+    temp_dir <- file.path(work_dir, stri_rand_strings(1, 10))
+    dir.create(temp_dir)
 
-  p_ciri <- ciri_prepde(df[c("ciri", "condition")], temp_dir)
-  p_stringtie <- stringtie_prepde(df[c("stringtie")], temp_dir)
+    p_ciri <- ciri_prepde(df[c("ciri", "condition")], temp_dir)
+    p_stringtie <- stringtie_prepde(df[c("stringtie")], temp_dir)
 
-  p_ciri_de <- ciriquant_de(p_ciri[[1]], p_ciri[[3]], p_stringtie[[1]], temp_dir)
+    p_ciri_de <- ciriquant_de(p_ciri[[1]], p_ciri[[3]], p_stringtie[[1]], temp_dir)
+
+    df_gene <- read.csv(p_ciri_de[[1]], row.names = 1)
+    df_circ <- read.csv(p_ciri_de[[2]], row.names = 1)
+
+    return(list(df_gene, df_circ))
+  },
+  finally = {
+    unlink(temp_dir, recursive = TRUE)
+  })
 }
