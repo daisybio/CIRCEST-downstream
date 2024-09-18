@@ -10,7 +10,8 @@
 		"vscode": {
 			"extensions": [
 				"Posit.shiny",
-				"REditorSupport.r"
+				"REditorSupport.r",
+				"mechatroner.rainbow-csv"
 			]
 		}
 	}
