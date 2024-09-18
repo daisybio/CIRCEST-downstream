@@ -6,9 +6,7 @@ source("load.R")
 source("filter_samples.R")
 source("filter_transcripts.R")
 source("dimred.R")
-source("pathways.R")
 source("statistics.R")
-source("genome_browser.R")
 source("about.R")
 
 ui <- navbarPage(
